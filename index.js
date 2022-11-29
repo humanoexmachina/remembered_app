@@ -1,20 +1,22 @@
-const { fstat } = require('fs');
+import * as fs from 'node:fs';
+import * as readline from 'node:readline';
+import * as path from 'node:path';
 
-const readline = require('readline').createInterface({
+const cmdLine = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
   });
   
-readline.question(`Where is your chat history file?`, filePath => {
-  console.log(`You have ${numMessageFile}! message files in total`);
-  console.log(`You have ${numPhoto}! photos in total`);
-  console.log(`You have ${numAudio}! audio in total`);
-  console.log(`You have ${numVideo}! videos in total`);
-  readline.close();
+cmdLine.question(`Where is your chat history folder?`, folderPath => {
+
+  console.log(`This is the folder path: `, folderPath);
+  var fileName = readFiles(path.resolve(folderPath));
+  console.log(fileName);
+  cmdLine.close();
 });
 
-fs.stat(filePath, (err, stats) => {
-  if (err) {
-    console.error(err);
-  }
-})
+function readFiles(folderPath) {
+  fs.readdirSync(folderPath).map(fileName => {
+    return path.join(folderPath, fileName);
+  });
+}
