@@ -16,5 +16,11 @@
   "bugs": {
     "url": "https://github.com/humanoexmachina/remembered_app/issues"
   },
-  "homepage": "https://github.com/humanoexmachina/remembered_app#readme"
+  "homepage": "https://github.com/humanoexmachina/remembered_app#readme",
+  "dependencies": {
+    "adm-zip": "^0.5.9",
+    "get-folder-size": "^4.0.0",
+    "junk": "^4.0.0",
+    "readline-promise": "^1.0.5"
+  }
 }
