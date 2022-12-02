@@ -21,6 +21,7 @@
     "adm-zip": "^0.5.9",
     "get-folder-size": "^4.0.0",
     "junk": "^4.0.0",
-    "readline-promise": "^1.0.5"
+    "readline-promise": "^1.0.5",
+    "utf8": "^3.0.0"
   }
 }
