@@ -19,10 +19,7 @@
   },
   "homepage": "https://github.com/humanoexmachina/remembered_app#readme",
   "dependencies": {
-    "adm-zip": "^0.5.9",
-    "get-folder-size": "^4.0.0",
-    "junk": "^4.0.0",
-    "readline-promise": "^1.0.5",
+    "sqlite3": "^5.1.2",
     "utf8": "^3.0.0"
   }
 }
