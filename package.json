@@ -5,7 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
@@ -21,6 +22,7 @@
     "adm-zip": "^0.5.9",
     "get-folder-size": "^4.0.0",
     "junk": "^4.0.0",
-    "readline-promise": "^1.0.5"
+    "readline-promise": "^1.0.5",
+    "utf8": "^3.0.0"
   }
 }

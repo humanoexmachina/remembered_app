@@ -1,14 +1,19 @@
+'use strict';
+
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import AdmZip, * as admZip from 'adm-zip';
 import getFolderSize from 'get-folder-size';
 import {isNotJunk} from 'junk';
 
+import {loadFile} from './parsers/jsonParser.mjs';
+
 
 const chatMemoryDir = `/Users/alicewang913/Documents/Remembered/ChatMemory`;
 // let chatHistoryPath = `/Users/alicewang913/Documents/Memory/WhatsApp_Chat_Chunyu_Shi`;
 let chatHistoryPath = `/Users/alicewang913/Documents/Memory/alice_wwwww913_ins_JSON`;
 // let chatHistoryPath = `/Users/alicewang913/Documents/Memory/alice_wwwww913_20221123.zip`;
+// let chatHistoryPath = `/Users/alicewang913/Documents/Memory/alice_wwwww913_ins_JSON_small_test`;
 
 const ChatSource = {
   Unknown: Symbol("unknown"),
@@ -86,7 +91,8 @@ switch (chatSource) {
         });
         
         for (let chatFile of chatFiles) {
-          console.log(`Parsing ${path.join(inboxDir, chatContact, chatFile)}`);
+          await loadFile(path.join(inboxDir, chatContact, chatFile));
+          console.log(`Finish parsing ${path.join(inboxDir, chatContact, chatFile)}`);
           console.log(`Saving all multi-media files to disk`);
         }
       }
