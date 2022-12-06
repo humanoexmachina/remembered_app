@@ -2,23 +2,95 @@
 
 import * as fs from 'node:fs';
 import utf8 from 'utf8';
+import sqlite3 from 'sqlite3';
 
-export async function loadFile(filePath) {
+/* enums: https://www.sohamkamani.com/javascript/enums/ */
+class Platform {
+    // Create new instances of the same class as static attributes
+    static Messenger = new Platform(1)
+    static Instagram = new Platform(2)
+
+    constructor(name) {
+        this.name = name
+    }
+}
+
+class ChatStatus {
+    // Create new instances of the same class as static attributes
+    static Live = new ChatStatus(1)
+    static Archived = new ChatStatus(2)
+
+    constructor(name) {
+        this.name = name
+    }
+}
+
+/* Open Database */
+let db = new sqlite3.Database('../data/remembered.db', (err) => {
+    if (err) {
+        return console.log(err.message);
+    }
+    console.log('Successfully connected to remembered.db SQLite3 database.');
+});
+
+initializeDatabaseTables()
+
+loadFile('../files/messenger/jiannanwang_-mmv48t8bq/message_1.json', Platform.Messenger.name, "jiannanwang_-mmv48t8bq", "jiannanwang");
+
+var platform
+var finalChatParticipants = []
+var chat
+
+async function loadFile(filePath, platform, platformContactId, chatTitle) {
     let rawData = await fs.promises.readFile(filePath);
     let parsedFile = JSON.parse(rawData);
     let participants = parsedFile.participants;
     let messages = parsedFile.messages;
+    // var finalChatParticipants = []
 
-    getParticipants(participants);
+    getParticipants(participants, platform, platformContactId, function(participants) {
+        console.log('participants:', participants)
+        finalChatParticipants = participants;
+        console.log('finalChatParticipants inside:', finalChatParticipants)
+    });
+
+    console.log(`finalChatParticipants: ${finalChatParticipants}`)
+
     getMessages(messages);
-}
+};
 
-function getParticipants(participants) {
+function getParticipants(participants, platform, platformContactId, callback) {
+    var allParticipants = []
+
+    const contactCallback = function(error, id) {
+        if (error) {
+            console.log(err);
+            throw err;
+        }
+
+        console.log(`id just added: ${id}`)
+        allParticipants.push(id)
+        console.log('allParticipants:', allParticipants)
+    }
+
     for (let i = 0; i < participants.length; i++) {
         const name = participants[i].name;
-        console.log(name);
+
+        if (i < participants.length - 1) {
+            switch (platform) {
+                case Platform.Messenger.name:
+                    insertNewContact(name, platformContactId, null, contactCallback);
+                    break;
+                case Platform.Instagram.name:
+                    insertNewContact(name, null, platformContactId, contactCallback);
+                    break;
+            }
+        }
     }
-}
+
+    console.log("allParticipants outside:", allParticipants)
+    callback(allParticipants)
+};
 
 function getMessages(messages) {
     for (let i = 0; i < messages.length; i++) {
@@ -27,34 +99,93 @@ function getMessages(messages) {
 
         switch (type) {
             case 'Generic':
-                if (message.hasOwnProperty(`content`)) {
-                    const decodedText = utf8.decode(message.content); // decodes symbols and emojis
-                    console.log(decodedText);
-                } else if (message.hasOwnProperty(`audio_files`)) {
-                    const audioFiles = message.audio_files;
-                    console.log(audioFiles[0].uri);
-                } else if (message.hasOwnProperty(`videos`)) {
-                    const videoFiles = message.videos;
-                    console.log(videoFiles[0].uri);
-                } else if (message.hasOwnProperty(`photos`)) {
-                    const photoFiles = message.photos;
-                    console.log(photoFiles[0].uri);
+                const text = message.content;
+                const audioFiles = message.audio_files;
+                const videoFiles = message.videos;
+                const photoFiles = message.photos;
+
+                if (text != null) {
+                    const decodedText = utf8.decode(text); // decodes symbols and emojis
+                    // console.log(decodedText);
                 } else {
-                    console.log(`It is a message we don't care about`);
+                    if (audioFiles != null) {
+                        // console.log(audioFiles[0].uri);
+                    } else if (videoFiles != null) {
+                        // console.log(videoFiles[0].uri);
+                    } else if (photoFiles != null) {
+                        // console.log(photoFiles[0].uri);
+                    } else {
+                        // console.log('no matching format');
+                    }
                 }
                 break;
             case 'Share':
-                // for message of type 'Share', it could be sharing a link or sharing some contents or both
-                if (message.hasOwnProperty(`content`)) {
-                    console.log(utf8.decode(message.content));
-                } else if (message.hasOwnProperty(`share`)) {
-                    if (message.share.hasOwnProperty(`link`)) {
-                        console.log(message.share.link);
-                    } else {
-                        console.log(`It is a message we don't care about`);
-                    }
-                } 
+                console.log(message.share.link);
                 break;
         }
     }
+};
+
+function initializeDatabaseTables() {
+    db.serialize(() => {
+        db.run(`CREATE TABLE IF NOT EXISTS chats (
+                id INTEGER PRIMARY KEY,
+                created INT NOT NULL,
+                last_updated INT NOT NULL,
+                customTitle TEXT NOT NULL,
+                participants TEXT NOT NULL,
+                platforms TEXT NOT NULL,
+                status INT NOT NULL
+            )`, (err) => {
+            if (err) {
+                console.log(err);
+                throw err;
+            }
+        });
+        db.run(`CREATE TABLE IF NOT EXISTS contacts (
+                id INTEGER PRIMARY KEY,
+                created INT NOT NULL,
+                last_updated INT NOT NULL,
+                nickname TEXT NOT NULL,
+                messenger_ids TEXT,
+                instagram_ids TEXT
+            )`, (err) => {
+            if (err) {
+                console.log(err);
+                throw err;
+            }
+        });
+    });
 }
+
+// db.serialize let us run sqlite operations in serial order
+// db.serialize(() => {
+
+// });
+
+function insertNewContact(contactName, messengerId, instagramId, callback) {
+    const query = 'INSERT INTO contacts(name,messenger_ids,instagram_ids) VALUES(?,?,?)'
+    const values = [contactName, messengerId, instagramId]
+    db.run(query, values, function(error) {
+        callback(error, this.lastID)
+    });
+}
+
+function insertNewChat(chatTitle, participants, platform, callback) {
+    const query = 'INSERT INTO chats(title,participants,platforms,status) VALUES(?,?,?,?)'
+    const values = [chatTitle, participants, platform, 1]
+    db.run(query, values, function(error) {
+        callback(error, this.lastID)
+    });
+}
+
+// 3rd operation (retrieve data from users table)
+// db.each(`SELECT email FROM users`, (err, row) => {
+//     if (err) {
+//         console.log(err);
+//         throw err;
+//     }
+//     console.log(row.email);
+// }, () => {
+//     console.log('query completed')
+// });
