@@ -35,20 +35,20 @@ let db = new sqlite3.Database('../data/remembered.db', (err) => {
 
 initializeDatabaseTables()
 
-loadFile('../files/messenger/jiannanwang_-mmv48t8bq/message_1.json', Platform.Messenger.name, "jiannanwang_-mmv48t8bq", "jiannanwang");
+loadFile('../files/arainyspringday_20221205/messages/inbox/graceandminyoungan_98otlxnfta/message_1.json', Platform.Instagram.name, "graceandminyoungan_98otlxnfta");
 
 var platform
 var finalChatParticipants = []
 var chat
 
-async function loadFile(filePath, platform, platformContactId, chatTitle) {
+async function loadFile(filePath, platform, chatTitle) {
     let rawData = await fs.promises.readFile(filePath);
     let parsedFile = JSON.parse(rawData);
     let participants = parsedFile.participants;
     let messages = parsedFile.messages;
     // var finalChatParticipants = []
 
-    getParticipants(participants, platform, platformContactId, function(participants) {
+    getParticipants(participants, platform, function(participants) {
         console.log('participants:', participants)
         finalChatParticipants = participants;
         console.log('finalChatParticipants inside:', finalChatParticipants)
@@ -59,7 +59,7 @@ async function loadFile(filePath, platform, platformContactId, chatTitle) {
     getMessages(messages);
 };
 
-function getParticipants(participants, platform, platformContactId, callback) {
+function getParticipants(participants, platform, callback) {
     var allParticipants = []
 
     const contactCallback = function(error, id) {
@@ -79,10 +79,10 @@ function getParticipants(participants, platform, platformContactId, callback) {
         if (i < participants.length - 1) {
             switch (platform) {
                 case Platform.Messenger.name:
-                    insertNewContact(name, platformContactId, null, contactCallback);
+                    insertNewContact(name, contactCallback);
                     break;
                 case Platform.Instagram.name:
-                    insertNewContact(name, null, platformContactId, contactCallback);
+                    insertNewContact(name, contactCallback);
                     break;
             }
         }
@@ -147,8 +147,6 @@ function initializeDatabaseTables() {
                 created INT NOT NULL,
                 last_updated INT NOT NULL,
                 nickname TEXT NOT NULL,
-                messenger_ids TEXT,
-                instagram_ids TEXT
             )`, (err) => {
             if (err) {
                 console.log(err);
@@ -163,9 +161,9 @@ function initializeDatabaseTables() {
 
 // });
 
-function insertNewContact(contactName, messengerId, instagramId, callback) {
+function insertNewContact(contactName, callback) {
     const query = 'INSERT INTO contacts(name,messenger_ids,instagram_ids) VALUES(?,?,?)'
-    const values = [contactName, messengerId, instagramId]
+    const values = [contactName]
     db.run(query, values, function(error) {
         callback(error, this.lastID)
     });
