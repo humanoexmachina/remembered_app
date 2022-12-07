@@ -37,16 +37,12 @@ initializeDatabaseTables()
 
 loadFile('../files/arainyspringday_20221205/messages/inbox/graceandminyoungan_98otlxnfta/message_1.json', Platform.Instagram.name, "graceandminyoungan_98otlxnfta");
 
-var platform
-var finalChatParticipants = []
-var chat
-
 async function loadFile(filePath, platform, chatTitle) {
     let rawData = await fs.promises.readFile(filePath);
     let parsedFile = JSON.parse(rawData);
     let participants = parsedFile.participants;
     let messages = parsedFile.messages;
-    // var finalChatParticipants = []
+    var finalChatParticipants = []
 
     getParticipants(participants, platform, function(participants) {
         console.log('participants:', participants)
@@ -74,17 +70,12 @@ function getParticipants(participants, platform, callback) {
     }
 
     for (let i = 0; i < participants.length; i++) {
-        const name = participants[i].name;
+        const name = utf8.decode(participants[i].name);
+        console.log(name)
 
         if (i < participants.length - 1) {
-            switch (platform) {
-                case Platform.Messenger.name:
-                    insertNewContact(name, contactCallback);
-                    break;
-                case Platform.Instagram.name:
-                    insertNewContact(name, contactCallback);
-                    break;
-            }
+            console.log(`inserting ${name} into DB`)
+            insertNewContact(name, contactCallback);
         }
     }
 
@@ -146,7 +137,7 @@ function initializeDatabaseTables() {
                 id INTEGER PRIMARY KEY,
                 created INT NOT NULL,
                 last_updated INT NOT NULL,
-                nickname TEXT NOT NULL,
+                nickname TEXT NOT NULL
             )`, (err) => {
             if (err) {
                 console.log(err);
@@ -156,14 +147,9 @@ function initializeDatabaseTables() {
     });
 }
 
-// db.serialize let us run sqlite operations in serial order
-// db.serialize(() => {
-
-// });
-
 function insertNewContact(contactName, callback) {
-    const query = 'INSERT INTO contacts(name,messenger_ids,instagram_ids) VALUES(?,?,?)'
-    const values = [contactName]
+    const query = 'INSERT INTO contacts(created, last_updated, nickname) VALUES(?,?,?)'
+    const values = [Date.now(), Date.now(), contactName]
     db.run(query, values, function(error) {
         callback(error, this.lastID)
     });
