@@ -48,6 +48,7 @@ let filePath =
   '../files/arainyspringday_20221207/messages/inbox/memyselfandi_5333246053447718/message_1.json';
 let platform = Platform.Instagram.name;
 let chatTitle = 'memyselfandi';
+let messages = null;
 let participantIds = [];
 let chatId = null;
 
@@ -61,26 +62,21 @@ let db = new sqlite3.Database('../data/remembered.db', (err) => {
 
 initializeDatabaseTables();
 
-loadFile(filePath, platform, chatTitle);
+loadFile();
 
-async function loadFile(filePath, platform, chatTitle) {
+async function loadFile() {
   let rawData = await fs.promises.readFile(filePath);
   let parsedFile = JSON.parse(rawData);
   let participants = parsedFile.participants;
-  let messages = parsedFile.messages;
-  const finalChatParticipants = await getParticipants(participants, platform);
-  console.log('finalChatParticipants outside:', finalChatParticipants);
-  const chatId = await insertNewChat(
-    chatTitle,
-    finalChatParticipants,
-    platform
-  );
+  messages = parsedFile.messages;
+
+  participantIds.push(await getParticipants(participants));
+  chatId = await insertNewChat();
   console.log('newly created chat:', chatId);
-  importMsgStaging(messages, chatId, platform);
+  importMsgStaging();
 }
 
-async function getParticipants(participants, platform) {
-  console.log('the current platform is:', platform);
+async function getParticipants(participants) {
   let participantIds = [];
 
   for (let i = 0; i < participants.length; i++) {
@@ -100,7 +96,7 @@ async function getParticipants(participants, platform) {
   return participantIds;
 }
 
-async function importMsgStaging(messages, chatId, platform) {
+async function importMsgStaging() {
   for (let i = 0; i < messages.length; i++) {
     const message = messages[i];
 
@@ -303,14 +299,14 @@ async function insertNewContact(contactName) {
   });
 }
 
-async function insertNewChat(chatTitle, participants, platform) {
+async function insertNewChat() {
   const query =
     'INSERT INTO chats(created, last_updated, customTitle, participants, platforms, status) VALUES(?,?,?,?,?,?)';
   const values = [
     Date.now(),
     Date.now(),
     chatTitle,
-    participants,
+    participantIds,
     platform,
     ChatStatus.Active.name,
   ];
