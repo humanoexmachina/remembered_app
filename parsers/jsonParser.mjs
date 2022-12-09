@@ -45,9 +45,9 @@ class MessageType {
 
 /* Import Session Attributes */
 let filePath =
-  '../files/arainyspringday_20221207/messages/inbox/memyselfandi_5333246053447718/message_1.json';
+  '../files/arainyspringday_20221207/messages/inbox/taei_1026691105399047/message_1.json';
 let platform = Platform.Instagram.name;
-let chatTitle = 'memyselfandi';
+let chatTitle = 'taei';
 let messages = null;
 let participantIds = [];
 let chatId = null;
@@ -108,17 +108,43 @@ async function importMsgStaging() {
     const videoFiles = message.videos;
     const photoFiles = message.photos;
 
-    // callback
+    // callback function
     const callbackFn = function (error, id) {
       if (error) {
         return console.log('##### ERROR:', error);
       }
-      console.log('Successfully inserted new message id:', id);
       return id;
     };
 
+    /* get all reactions */
+    const reactions = message.reactions;
+    const reactionDic = {};
+    const reactionArray = [];
+
+    if (reactions != undefined) {
+      for (let i = 0; i < reactions.length; i++) {
+        const reaction = utf8.decode(reactions[i].reaction);
+        const actor = utf8.decode(reactions[i].actor);
+
+        if (reactionDic[actor] == reaction) {
+          console.log('match?', reactionDic[actor] == reaction);
+          continue;
+        }
+
+        reactionDic[actor] = reaction;
+        console.log('reactionDic:', reactionDic);
+
+        reactionArray.push(JSON.stringify(reactionDic));
+        console.log('reactionArray', reactionArray);
+      }
+    }
+
     // checking for undefined: https://stackoverflow.com/questions/17150396/benefit-of-using-object-hasownproperty-vs-testing-if-a-property-is-undefined
     if (content != undefined) {
+      if (content == 'Liked a message') {
+        continue;
+      }
+
       const decodedText = utf8.decode(content); // decodes symbols and emojis
       await insertNewMessage(
         dateSent,
@@ -126,6 +152,7 @@ async function importMsgStaging() {
         platform,
         sender,
         MessageType.Text.name,
+        reactionArray,
         decodedText,
         null,
         null,
@@ -141,6 +168,7 @@ async function importMsgStaging() {
           platform,
           sender,
           MessageType.Audio.name,
+          reactionArray,
           null,
           audioUri,
           null,
@@ -156,6 +184,7 @@ async function importMsgStaging() {
           platform,
           sender,
           MessageType.Video.name,
+          reactionArray,
           null,
           videoUri,
           null,
@@ -171,6 +200,7 @@ async function importMsgStaging() {
           platform,
           sender,
           MessageType.Photo.name,
+          reactionArray,
           null,
           photoUri,
           null,
@@ -178,7 +208,18 @@ async function importMsgStaging() {
         );
       }
     } else {
-      console.log(`It is a message we don't care about`);
+      await insertNewMessage(
+        dateSent,
+        chatId,
+        platform,
+        sender,
+        '##### unknown ######',
+        reactionArray,
+        '################## ?? ##################',
+        null,
+        null,
+        callbackFn
+      );
     }
   }
 }
@@ -224,6 +265,7 @@ function initializeDatabaseTables() {
       platform INTEGER NOT NULL,
       sender_id INTEGER NOT NULL,
       type INTEGER NOT NULL,
+      reactions TEXT,
       text TEXT,
       media_uris TEXT,
       link_url TEXT
@@ -244,19 +286,21 @@ async function insertNewMessage(
   platform,
   senderId,
   type,
+  reactions,
   text,
   mediaUri,
   linkUrl,
   callback
 ) {
   const query =
-    'INSERT INTO msgImportStaging(date_sent, chat_id, platform, sender_id, type, text, media_uris, link_url) VALUES(?,?,?,?,?,?,?,?)';
+    'INSERT INTO msgImportStaging(date_sent, chat_id, platform, sender_id, type, reactions, text, media_uris, link_url) VALUES(?,?,?,?,?,?,?,?,?)';
   const values = [
     dateSent,
     chatId,
     platform,
     senderId,
     type,
+    reactions,
     text,
     mediaUri,
     linkUrl,
