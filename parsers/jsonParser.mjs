@@ -25,7 +25,6 @@ class ChatStatus {
 
 class MessageType {
   static Text = new ChatStatus('text');
-  static Link = new ChatStatus('link');
   static Photo = new ChatStatus('photo');
   static Video = new ChatStatus('video');
   static Audio = new ChatStatus('audio');
@@ -45,9 +44,9 @@ class MessageType {
 
 /* Import Session Attributes */
 let filePath =
-  '../files/arainyspringday_20221207/messages/inbox/taei_1026691105399047/message_1.json';
+  '../files/arainyspringday_20221207/messages/inbox/memyselfandi_5333246053447718/message_1.json';
 let platform = Platform.Instagram.name;
-let chatTitle = 'taei';
+let chatTitle = 'memyselfandi';
 let messages = null;
 let participantIds = [];
 let chatId = null;
@@ -155,7 +154,6 @@ async function importMsgStaging() {
         reactionArray,
         decodedText,
         null,
-        null,
         callbackFn
       );
     } else if (audioFiles != undefined) {
@@ -171,7 +169,6 @@ async function importMsgStaging() {
           reactionArray,
           null,
           audioUri,
-          null,
           callbackFn
         );
       }
@@ -187,7 +184,6 @@ async function importMsgStaging() {
           reactionArray,
           null,
           videoUri,
-          null,
           callbackFn
         );
       }
@@ -203,7 +199,6 @@ async function importMsgStaging() {
           reactionArray,
           null,
           photoUri,
-          null,
           callbackFn
         );
       }
@@ -216,7 +211,6 @@ async function importMsgStaging() {
         '##### unknown ######',
         reactionArray,
         '################## ?? ##################',
-        null,
         null,
         callbackFn
       );
@@ -267,8 +261,7 @@ function initializeDatabaseTables() {
       type INTEGER NOT NULL,
       reactions TEXT,
       text TEXT,
-      media_uris TEXT,
-      link_url TEXT
+      media_uris TEXT
     )`,
       (err) => {
         if (err) {
@@ -289,11 +282,10 @@ async function insertNewMessage(
   reactions,
   text,
   mediaUri,
-  linkUrl,
   callback
 ) {
   const query =
-    'INSERT INTO msgImportStaging(date_sent, chat_id, platform, sender_id, type, reactions, text, media_uris, link_url) VALUES(?,?,?,?,?,?,?,?,?)';
+    'INSERT INTO msgImportStaging(date_sent, chat_id, platform, sender_id, type, reactions, text, media_uris) VALUES(?,?,?,?,?,?,?,?)';
   const values = [
     dateSent,
     chatId,
@@ -303,7 +295,6 @@ async function insertNewMessage(
     reactions,
     text,
     mediaUri,
-    linkUrl,
   ];
 
   db.run(query, values, function (error) {
