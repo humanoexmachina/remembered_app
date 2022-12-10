@@ -61,8 +61,8 @@ let db = new sqlite3.Database('../data/remembered.db', (err) => {
 initializeDatabaseTables();
 
 loadFile(
-  '../files/arainyspringday_20221207/messages/inbox/memyselfandi_5333246053447718/message_1.json',
-  Platform.Instagram.name
+  '../files/facebook-shicyu/messages/inbox/ezekielpak_epxallhmza/message_1.json',
+  Platform.Messenger.name
 );
 
 async function loadFile(userFilePath, selectedPlatform) {
@@ -104,13 +104,18 @@ async function importMsgStaging() {
   for (let i = 0; i < messages.length; i++) {
     const message = messages[i];
 
-    // Message Attributes
+    // IG & Messenger
     const sender = utf8.decode(message.sender_name);
     const dateSent = message.timestamp_ms;
     const content = message.content;
+    const sticker = message.sticker;
     const audioFiles = message.audio_files;
     const videoFiles = message.videos;
     const photoFiles = message.photos;
+    const unsent = message.is_unsent;
+
+    /* Messenger only */
+    const gifs = message.gifs;
 
     // callback function
     const callbackFn = function (error, id) {
@@ -119,6 +124,11 @@ async function importMsgStaging() {
       }
       return id;
     };
+
+    /* skip unsent messages - Messenger*/
+    if (unsent) {
+      continue;
+    }
 
     /* get all reactions */
     const reactions = message.reactions;
@@ -131,21 +141,25 @@ async function importMsgStaging() {
         const actor = utf8.decode(reactions[i].actor);
 
         if (reactionDic[actor] == reaction) {
-          console.log('match?', reactionDic[actor] == reaction);
           continue;
         }
 
         reactionDic[actor] = reaction;
-        console.log('reactionDic:', reactionDic);
-
         reactionArray.push(JSON.stringify(reactionDic));
-        console.log('reactionArray', reactionArray);
       }
     }
 
     // checking for undefined: https://stackoverflow.com/questions/17150396/benefit-of-using-object-hasownproperty-vs-testing-if-a-property-is-undefined
     if (content != undefined) {
+      /* Remove reactions - Instagram */
       if (content == 'Liked a message') {
+        continue;
+      }
+      /* Remove reactions - Messenger */
+      if (
+        content.startsWith('Reacted') &&
+        content.trim().endsWith('to your message')
+      ) {
         continue;
       }
 
@@ -159,6 +173,20 @@ async function importMsgStaging() {
         reactionArray,
         decodedText,
         null,
+        callbackFn
+      );
+    } else if (sticker != undefined) {
+      /* Messenger Only */
+      const stickerUri = sticker.uri;
+      await insertNewMessage(
+        dateSent,
+        chatId,
+        platform,
+        sender,
+        MessageType.Sticker.name,
+        reactionArray,
+        null,
+        stickerUri,
         callbackFn
       );
     } else if (audioFiles != undefined) {
@@ -204,6 +232,21 @@ async function importMsgStaging() {
           reactionArray,
           null,
           photoUri,
+          callbackFn
+        );
+      }
+    } else if (gifs != undefined) {
+      for (let i = 0; i < gifs.length; i++) {
+        const gifUri = gifs[i].uri;
+        await insertNewMessage(
+          dateSent,
+          chatId,
+          platform,
+          sender,
+          MessageType.Gif.name,
+          reactionArray,
+          null,
+          gifUri,
           callbackFn
         );
       }
