@@ -44,8 +44,8 @@ class MessageType {
 
 /* Import Session Attributes */
 let filePath = '';
+let chatTitle = '';
 let platform = null;
-let chatTitle = 'memyselfandi';
 let messages = null;
 let participantIds = [];
 let chatId = null;
@@ -61,13 +61,15 @@ let db = new sqlite3.Database('../data/remembered.db', (err) => {
 initializeDatabaseTables();
 
 loadFile(
-  '../files/facebook-shicyu/messages/inbox/ezekielpak_epxallhmza/message_1.json',
-  Platform.Messenger.name
+  '../files/arainyspringday_20221207/messages/inbox/memyselfandi_5333246053447718/message_1.json',
+  Platform.Messenger.name,
+  'memyselfandi'
 );
 
-async function loadFile(userFilePath, selectedPlatform) {
+async function loadFile(userFilePath, selectedPlatform, userChatTitle) {
   filePath = userFilePath;
   platform = selectedPlatform;
+  chatTitle = userChatTitle;
 
   let rawData = await fs.promises.readFile(filePath);
   let parsedFile = JSON.parse(rawData);
@@ -108,14 +110,17 @@ async function importMsgStaging() {
     const sender = utf8.decode(message.sender_name);
     const dateSent = message.timestamp_ms;
     const content = message.content;
-    const sticker = message.sticker;
+
+    /* detecting stickers */
+    const sticker = message.sticker; // Messenger Sticker
+    const stickerLink = message.share?.link; // Instagram Stickers
+    const stickerOwner = message.share?.original_content_owner; // Verifies if is an Instagram Sticker
+
+    const gifs = message.gifs; // Messenger only
     const audioFiles = message.audio_files;
     const videoFiles = message.videos;
     const photoFiles = message.photos;
     const unsent = message.is_unsent;
-
-    /* Messenger only */
-    const gifs = message.gifs;
 
     // callback function
     const callbackFn = function (error, id) {
@@ -175,20 +180,38 @@ async function importMsgStaging() {
         null,
         callbackFn
       );
-    } else if (sticker != undefined) {
-      /* Messenger Only */
-      const stickerUri = sticker.uri;
-      await insertNewMessage(
-        dateSent,
-        chatId,
-        platform,
-        sender,
-        MessageType.Sticker.name,
-        reactionArray,
-        null,
-        stickerUri,
-        callbackFn
-      );
+    } else if (
+      sticker != undefined ||
+      (stickerLink != undefined && stickerOwner != undefined)
+    ) {
+      if (sticker != undefined) {
+        /* Messenger */
+        const stickerUri = sticker.uri;
+        await insertNewMessage(
+          dateSent,
+          chatId,
+          platform,
+          sender,
+          MessageType.Sticker.name,
+          reactionArray,
+          null,
+          stickerUri,
+          callbackFn
+        );
+      } else if (stickerLink != undefined && stickerOwner != undefined) {
+        /* Instagram*/
+        await insertNewMessage(
+          dateSent,
+          chatId,
+          platform,
+          sender,
+          MessageType.Sticker.name,
+          reactionArray,
+          null,
+          stickerLink,
+          callbackFn
+        );
+      }
     } else if (audioFiles != undefined) {
       // currently each of the media loops creates a new message row for each file. This needs to be refactored to properly support multiple files
       for (let i = 0; i < audioFiles.length; i++) {
