@@ -48,6 +48,7 @@ let chatTitle = '';
 let platform = null;
 let messages = null;
 let participantIds = [];
+let senderDic = {};
 let chatId = null;
 
 /* Open Database */
@@ -61,9 +62,9 @@ let db = new sqlite3.Database('../data/remembered.db', (err) => {
 initializeDatabaseTables();
 
 loadFile(
-  '../files/arainyspringday_20221207/messages/inbox/memyselfandi_5333246053447718/message_1.json',
+  '../files/facebook-shicyu/messages/inbox/ezekielpak_epxallhmza/message_1.json',
   Platform.Messenger.name,
-  'memyselfandi'
+  'ezekielpak'
 );
 
 async function loadFile(userFilePath, selectedPlatform, userChatTitle) {
@@ -83,7 +84,7 @@ async function loadFile(userFilePath, selectedPlatform, userChatTitle) {
 }
 
 async function getParticipants(participants) {
-  let participantIds = []; // is this one needed??
+  let participantIds = [];
 
   for (let i = 0; i < participants.length; i++) {
     const contactName = utf8.decode(participants[i].name);
@@ -92,12 +93,15 @@ async function getParticipants(participants) {
     if (i < participants.length - 1) {
       console.log(`inserting ${contactName} into DB`);
 
-      const participantId = await insertNewContact(contactName);
+      const participantId = await insertNewContact(contactName); // this is an array
       console.log('participantId:', participantId);
       participantIds.push(...participantId);
+
+      /* save senderIds to dictionary to be used in future */
+      senderDic[contactName] = participantId[0];
     }
   }
-
+  console.log('senderDic:', senderDic);
   console.log('final participantIds:', participantIds);
   return participantIds;
 }
@@ -107,7 +111,10 @@ async function importMsgStaging() {
     const message = messages[i];
 
     // IG & Messenger
-    const sender = utf8.decode(message.sender_name);
+    const senderName = utf8.decode(message.sender_name);
+    const senderId =
+      senderDic[senderName] != undefined ? senderDic[senderName] : 0;
+    console.log(senderId);
     const dateSent = message.timestamp_ms;
     const content = message.content;
 
@@ -173,7 +180,7 @@ async function importMsgStaging() {
         dateSent,
         chatId,
         platform,
-        sender,
+        senderId,
         MessageType.Text.name,
         reactionArray,
         decodedText,
@@ -191,7 +198,7 @@ async function importMsgStaging() {
           dateSent,
           chatId,
           platform,
-          sender,
+          senderId,
           MessageType.Sticker.name,
           reactionArray,
           null,
@@ -204,7 +211,7 @@ async function importMsgStaging() {
           dateSent,
           chatId,
           platform,
-          sender,
+          senderId,
           MessageType.Sticker.name,
           reactionArray,
           null,
@@ -220,7 +227,7 @@ async function importMsgStaging() {
           dateSent,
           chatId,
           platform,
-          sender,
+          senderId,
           MessageType.Audio.name,
           reactionArray,
           null,
@@ -235,7 +242,7 @@ async function importMsgStaging() {
           dateSent,
           chatId,
           platform,
-          sender,
+          senderId,
           MessageType.Video.name,
           reactionArray,
           null,
@@ -250,7 +257,7 @@ async function importMsgStaging() {
           dateSent,
           chatId,
           platform,
-          sender,
+          senderId,
           MessageType.Photo.name,
           reactionArray,
           null,
@@ -265,7 +272,7 @@ async function importMsgStaging() {
           dateSent,
           chatId,
           platform,
-          sender,
+          senderId,
           MessageType.Gif.name,
           reactionArray,
           null,
@@ -278,7 +285,7 @@ async function importMsgStaging() {
         dateSent,
         chatId,
         platform,
-        sender,
+        senderId,
         '##### unknown ######',
         reactionArray,
         '################## ?? ##################',
