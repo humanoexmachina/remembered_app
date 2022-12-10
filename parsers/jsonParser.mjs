@@ -43,9 +43,8 @@ class MessageType {
 }
 
 /* Import Session Attributes */
-let filePath =
-  '../files/arainyspringday_20221207/messages/inbox/memyselfandi_5333246053447718/message_1.json';
-let platform = Platform.Instagram.name;
+let filePath = '';
+let platform = null;
 let chatTitle = 'memyselfandi';
 let messages = null;
 let participantIds = [];
@@ -61,9 +60,15 @@ let db = new sqlite3.Database('../data/remembered.db', (err) => {
 
 initializeDatabaseTables();
 
-loadFile();
+loadFile(
+  '../files/arainyspringday_20221207/messages/inbox/memyselfandi_5333246053447718/message_1.json',
+  Platform.Instagram.name
+);
 
-async function loadFile() {
+async function loadFile(userFilePath, selectedPlatform) {
+  filePath = userFilePath;
+  platform = selectedPlatform;
+
   let rawData = await fs.promises.readFile(filePath);
   let parsedFile = JSON.parse(rawData);
   let participants = parsedFile.participants;
@@ -76,7 +81,7 @@ async function loadFile() {
 }
 
 async function getParticipants(participants) {
-  let participantIds = [];
+  let participantIds = []; // is this one needed??
 
   for (let i = 0; i < participants.length; i++) {
     const contactName = utf8.decode(participants[i].name);
