@@ -1,18 +1,9 @@
 'use strict';
 
-import * as fs from 'node:fs';
-import utf8 from 'utf8';
 import sqlite3 from 'sqlite3';
-
-/* enums: https://www.sohamkamani.com/javascript/enums/ */
-class Platform {
-  static Messenger = new Platform('messenger');
-  static Instagram = new Platform('instagram');
-
-  constructor(name) {
-    this.name = name;
-  }
-}
+import * as path from 'node:path';
+import utf8 from 'utf8';
+import {db, chatMemoryDir} from '../index.js';
 
 class ChatStatus {
   static Active = new ChatStatus('active');
@@ -31,6 +22,7 @@ class MessageType {
   static Gif = new ChatStatus('gif');
   static Sticker = new ChatStatus('sticker');
   static Reaction = new ChatStatus('reaction');
+  // Future types
   // static File = new ChatStatus(9);
   // static Post = new ChatStatus(10);
   // static Contact = new ChatStatus(11);
@@ -42,71 +34,143 @@ class MessageType {
   }
 }
 
-/* Import Session Attributes */
-let filePath = '';
-let chatTitle = '';
-let platform = null;
-let messages = null;
-let participantIds = [];
-let senderDic = {};
-let chatId = null;
-
-/* Open Database */
-let db = new sqlite3.Database('../data/remembered.db', (err) => {
-  if (err) {
-    return console.log(err.message);
-  }
-  console.log('Successfully connected to remembered.db SQLite3 database.');
-});
-
-initializeDatabaseTables();
-
-loadFile(
-  '../files/facebook-shicyu/messages/inbox/ezekielpak_epxallhmza/message_1.json',
-  Platform.Messenger.name,
-  'ezekielpak'
-);
-
-async function loadFile(userFilePath, selectedPlatform, userChatTitle) {
-  filePath = userFilePath;
-  platform = selectedPlatform;
-  chatTitle = userChatTitle;
-
-  let rawData = await fs.promises.readFile(filePath);
-  let parsedFile = JSON.parse(rawData);
-  let participants = parsedFile.participants;
-  messages = parsedFile.messages;
-
-  participantIds.push(await getParticipants(participants));
-  chatId = await insertNewChat();
-  console.log('newly created chat:', chatId);
-  importMsgStaging();
+export function createNewDatabase() {
+  return new sqlite3.Database(path.join(chatMemoryDir, 'Data/remembered.db'), (err) => {
+      if (err) {
+        return console.log(err.message);
+      }
+      console.log('Successfully connected to remembered.db SQLite3 database.');
+    });
 }
 
-async function getParticipants(participants) {
-  let participantIds = [];
-
-  for (let i = 0; i < participants.length; i++) {
-    const contactName = utf8.decode(participants[i].name);
-    console.log(contactName);
-
-    if (i < participants.length - 1) {
-      console.log(`inserting ${contactName} into DB`);
-
-      const participantId = await insertNewContact(contactName); // this is an array
-      console.log('participantId:', participantId);
-      participantIds.push(...participantId);
-
-      /* save senderIds to dictionary to be used in future */
-      senderDic[contactName] = participantId[0];
-    }
-  }
-  console.log('senderDic:', senderDic);
-  console.log('final participantIds:', participantIds);
-  return participantIds;
+// Create chats, contacts and message staging tables in the db
+export function initializeDatabaseTables() {
+  db.serialize(() => {
+    db.run(
+      `CREATE TABLE IF NOT EXISTS chats (
+        id INTEGER PRIMARY KEY,
+        created INTEGER NOT NULL,
+        last_updated INTEGER NOT NULL,
+        customTitle TEXT NOT NULL,
+        participants TEXT NOT NULL,
+        platforms TEXT NOT NULL,
+        status INTEGER NOT NULL
+      )`,
+      (err) => {
+        if (err) {
+          console.log(err);
+          throw err;
+        }
+      }
+    );
+    db.run(
+      `CREATE TABLE IF NOT EXISTS contacts (
+        id INTEGER PRIMARY KEY,
+        created INTEGER NOT NULL,
+        last_updated INTEGER NOT NULL,
+        nickname TEXT NOT NULL
+      )`,
+      (err) => {
+        if (err) {
+          console.log(err);
+          throw err;
+        }
+      }
+    );
+    db.run(
+      `CREATE TABLE IF NOT EXISTS msgImportStaging (
+      id INTEGER PRIMARY KEY,
+      date_sent INTEGER NOT NULL,
+      chat_id INTEGER NOT NULL,
+      platform INTEGER NOT NULL,
+      sender_id INTEGER NOT NULL,
+      type INTEGER NOT NULL,
+      reactions TEXT,
+      text TEXT,
+      media_uris TEXT
+    )`,
+      (err) => {
+        if (err) {
+          console.log(err);
+          throw err;
+        }
+      }
+    );
+  });
 }
 
-async function importMsgStaging() {
+export async function insertNewContact(contactName) {
+  const query =
+    'INSERT INTO contacts(created, last_updated, nickname) VALUES(?,?,?)';
+  const values = [Date.now(), Date.now(), contactName];
+  let promises = [];
+
+  promises.push(
+    new Promise((resolve, reject) => {
+      db.run(query, values, function (error) {
+        if (error) {
+          console.log('##### ERROR insertNewContact:', error);
+          reject(error);
+        } else {
+          console.log('id from insertNewContact:', this.lastID);
+          resolve(this.lastID);
+        }
+      });
+    })
+  );
+
+  return Promise.all(promises).then((values) => {
+    return new Promise((resolve, reject) => {
+      if (values.length > 0) {
+        console.log('promises values:', values);
+        resolve(values);
+      } else {
+        reject('##### ERROR: No contact was created from this file.');
+      }
+    });
+  });
+}
+
+export async function insertNewChat(chatTitle, participantIds, platform) {
+  const query =
+    'INSERT INTO chats(created, last_updated, customTitle, participants, platforms, status) VALUES(?,?,?,?,?,?)';
+  const values = [
+    Date.now(),
+    Date.now(),
+    chatTitle,
+    participantIds,
+    platform,
+    ChatStatus.Active.name,
+  ];
+  let promises = [];
+
+  promises.push(
+    new Promise((resolve, reject) => {
+      db.run(query, values, function (error) {
+        if (error) {
+          console.log('##### ERROR insertNewChat:', error);
+          reject(error);
+        } else {
+          console.log('id from insertNewChat:', this.lastID);
+          resolve(this.lastID);
+        }
+      });
+    })
+  );
+
+  return Promise.all(promises).then((values) => {
+    return new Promise((resolve, reject) => {
+      if (values.length > 0) {
+        console.log('promises values:', values);
+        resolve(values);
+      } else {
+        reject('##### ERROR: No chat was created from this file.');
+      }
+    });
+  });
+}
+
+export async function importMsgStaging(messages, senderDic, chatId, platform) {
   for (let i = 0; i < messages.length; i++) {
     const message = messages[i];
 
@@ -296,61 +360,6 @@ async function importMsgStaging() {
   }
 }
 
-function initializeDatabaseTables() {
-  db.serialize(() => {
-    db.run(
-      `CREATE TABLE IF NOT EXISTS chats (
-        id INTEGER PRIMARY KEY,
-        created INTEGER NOT NULL,
-        last_updated INTEGER NOT NULL,
-        customTitle TEXT NOT NULL,
-        participants TEXT NOT NULL,
-        platforms TEXT NOT NULL,
-        status INTEGER NOT NULL
-      )`,
-      (err) => {
-        if (err) {
-          console.log(err);
-          throw err;
-        }
-      }
-    );
-    db.run(
-      `CREATE TABLE IF NOT EXISTS contacts (
-        id INTEGER PRIMARY KEY,
-        created INTEGER NOT NULL,
-        last_updated INTEGER NOT NULL,
-        nickname TEXT NOT NULL
-      )`,
-      (err) => {
-        if (err) {
-          console.log(err);
-          throw err;
-        }
-      }
-    );
-    db.run(
-      `CREATE TABLE IF NOT EXISTS msgImportStaging (
-      id INTEGER PRIMARY KEY,
-      date_sent INTEGER NOT NULL,
-      chat_id INTEGER NOT NULL,
-      platform INTEGER NOT NULL,
-      sender_id INTEGER NOT NULL,
-      type INTEGER NOT NULL,
-      reactions TEXT,
-      text TEXT,
-      media_uris TEXT
-    )`,
-      (err) => {
-        if (err) {
-          console.log(err);
-          throw err;
-        }
-      }
-    );
-  });
-}
-
 async function insertNewMessage(
   dateSent,
   chatId,
@@ -379,93 +388,3 @@ async function insertNewMessage(
     callback(error, this.lastID);
   });
 }
-
-async function insertNewContact(contactName) {
-  const query =
-    'INSERT INTO contacts(created, last_updated, nickname) VALUES(?,?,?)';
-  const values = [Date.now(), Date.now(), contactName];
-  let promises = [];
-
-  promises.push(
-    new Promise((resolve, reject) => {
-      db.run(query, values, function (error) {
-        if (error) {
-          console.log('##### ERROR insertNewContact:', error);
-          reject(error);
-        } else {
-          console.log('id from insertNewContact:', this.lastID);
-          resolve(this.lastID);
-        }
-      });
-    })
-  );
-
-  return Promise.all(promises).then((values) => {
-    return new Promise((resolve, reject) => {
-      if (values.length > 0) {
-        console.log('promises values:', values);
-        resolve(values);
-      } else {
-        reject('##### ERROR: No contact was created from this file.');
-      }
-    });
-  });
-}
-
-async function insertNewChat() {
-  const query =
-    'INSERT INTO chats(created, last_updated, customTitle, participants, platforms, status) VALUES(?,?,?,?,?,?)';
-  const values = [
-    Date.now(),
-    Date.now(),
-    chatTitle,
-    participantIds,
-    platform,
-    ChatStatus.Active.name,
-  ];
-  let promises = [];
-
-  promises.push(
-    new Promise((resolve, reject) => {
-      db.run(query, values, function (error) {
-        if (error) {
-          console.log('##### ERROR insertNewChat:', error);
-          reject(error);
-        } else {
-          console.log('id from insertNewChat:', this.lastID);
-          resolve(this.lastID);
-        }
-      });
-    })
-  );
-
-  return Promise.all(promises).then((values) => {
-    return new Promise((resolve, reject) => {
-      if (values.length > 0) {
-        console.log('promises values:', values);
-        resolve(values);
-      } else {
-        reject('##### ERROR: No chat was created from this file.');
-      }
-    });
-  });
-}
-
-// 3rd operation (retrieve data from users table)
-// db.each(`SELECT email FROM users`, (err, row) => {
-//   if (err) {
-//     console.log(err);
-//     throw err;
-//   }
-//   console.log(row.email);
-// }, () => {
-//   console.log('query completed')
-// });
-
-/* Close the database */
-// db.close((err) => {
-//   if (err) {
-//     return console.error(err.message);
-//   }
-//   console.log('Closed the database connection.');
-// });

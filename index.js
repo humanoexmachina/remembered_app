@@ -6,24 +6,25 @@ import AdmZip, * as admZip from 'adm-zip';
 import getFolderSize from 'get-folder-size';
 import {isNotJunk} from 'junk';
 
-import {loadFile} from './parsers/jsonParser.mjs';
+import {loadFile} from './service/jsonParser.mjs';
+import {createNewDatabase, initializeDatabaseTables} from './service/db.js';
 
-
-const chatMemoryDir = `/Users/alicewang913/Documents/Remembered/ChatMemory`;
-// let chatHistoryPath = `/Users/alicewang913/Documents/Memory/WhatsApp_Chat_Chunyu_Shi`;
+// TODO: Move under system APPDATA directory later
+export const chatMemoryDir = `/Users/alicewang913/Documents/Remembered/ChatMemory`;
 let chatHistoryPath = `/Users/alicewang913/Documents/Memory/alice_wwwww913_ins_JSON`;
 // let chatHistoryPath = `/Users/alicewang913/Documents/Memory/alice_wwwww913_20221123.zip`;
+// let chatHistoryPath = `/Users/alicewang913/Documents/Memory/facebook-jiannanwang54.zip`;
 // let chatHistoryPath = `/Users/alicewang913/Documents/Memory/alice_wwwww913_ins_JSON_small_test`;
 
-const ChatSource = {
-  Unknown: Symbol("unknown"),
-  WhatsApp: Symbol("whatsapp"),
-  Meta: Symbol("meta")
+const ChatPlatform = {
+  Unknown : "unknown",
+  Messenger : "messenger",
+  Instagram : "instagram"
 }
 
 const JSON = `.json`;
 
-let chatSource = ChatSource.Unknown;
+let chatPlatform = ChatPlatform.Unknown;
 
 // check if the chat history is a zip file or folder
 const chatHistoryStats = fs.statSync(chatHistoryPath);
@@ -33,14 +34,15 @@ if (chatHistoryStats.isFile() && (path.extname(chatHistoryPath) == `.zip`)) {
   console.log(`Users uploaded a zip file`);
 
   // create directory
-  if (!fs.existsSync()) fs.mkdirSync(chatMemoryDir, {recursive: true});
-  console.log(`created ${chatMemoryDir}`);
+  const decompressPath = path.join(chatMemoryDir, Date.now().toString());
+  fs.mkdirSync(decompressPath, {recursive: true});
+  console.log(`created ${decompressPath}`);
   // unzip the file
   const chatZip = new AdmZip(chatHistoryPath);
-  chatZip.extractAllTo(chatMemoryDir);
+  chatZip.extractAllTo(decompressPath);
 
   // update the path to the new decompressed folder
-  chatHistoryPath = chatMemoryDir;
+  chatHistoryPath = decompressPath;
 } else if (chatHistoryStats.isDirectory()) {
   // users uploaded a chat history directory
   console.log(`Users uploaded a chat history directory`);
@@ -48,28 +50,31 @@ if (chatHistoryStats.isFile() && (path.extname(chatHistoryPath) == `.zip`)) {
   throw new Error(`Please upload the original chat history file downloaded from chat apps`);
 }
 
-
 // Determine the source of the chat history
-if (fs.existsSync(path.join(chatHistoryPath, `_chat.txt`))) {
-  // chat history is from whatsapp
-  console.log("Chat history is from Whatsapp")
-  chatSource = ChatSource.WhatsApp;
+if (fs.existsSync(path.join(chatHistoryPath, `past_instagram_insights`))) {
+  // chat history is from Instagram
+  console.log("Chat history is from Instagram");
+  chatPlatform = ChatPlatform.Instagram;
 } else if (fs.existsSync(path.join(chatHistoryPath, `messages`))) {
-  // chat history is from Meta
-  console.log("Chat history is from Meta");
-  chatSource = ChatSource.Meta;
+  // chat history is from Messenger
+  console.log("Chat history is from Messenger");
+  chatPlatform = ChatPlatform.Messenger;
 } else {
   throw new Error("Seems like there is no chat history to be read");
 }
 
-switch (chatSource) {
-  case ChatSource.WhatsApp:
-    if (fs.existsSync(path.join(chatHistoryPath, `_chat.txt`))) {
-      console.log(`Parsing the chat file from WhatsApp`);
-    }
-    console.log(`Save multi-media files to the memory folder on disk`);
-  break;
-  case ChatSource.Meta:
+/* Open Database */
+if (!fs.existsSync(path.join(chatMemoryDir, `Data`))) {
+  fs.mkdirSync(path.join(chatMemoryDir, `Data`), {recursive: true});
+}
+export var db = createNewDatabase();
+
+/* Create data tables */
+initializeDatabaseTables();
+
+switch (chatPlatform) {
+  case ChatPlatform.Instagram:
+  case ChatPlatform.Messenger:
     const inboxDir = path.join(chatHistoryPath, `messages/inbox`);
     if (fs.existsSync(inboxDir)) {
       // sort chats by the size to gauga the importance of contacts
@@ -91,8 +96,9 @@ switch (chatSource) {
         });
         
         for (let chatFile of chatFiles) {
-          await loadFile(path.join(inboxDir, chatContact, chatFile));
-          console.log(`Finish parsing ${path.join(inboxDir, chatContact, chatFile)}`);
+          let chatFilePath = path.join(inboxDir, chatContact, chatFile);
+          await loadFile(chatFilePath, chatPlatform, chatContact);
+          console.log(`Finish parsing ${chatFilePath}`);
           console.log(`Saving all multi-media files to disk`);
         }
       }
