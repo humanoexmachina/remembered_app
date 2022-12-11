@@ -4,35 +4,7 @@ import sqlite3 from 'sqlite3';
 import * as path from 'node:path';
 import utf8 from 'utf8';
 import {db, chatMemoryDir} from '../index.js';
-
-class ChatStatus {
-  static Active = new ChatStatus('active');
-  static Archived = new ChatStatus('archived');
-
-  constructor(name) {
-    this.name = name;
-  }
-}
-
-class MessageType {
-  static Text = new ChatStatus('text');
-  static Photo = new ChatStatus('photo');
-  static Video = new ChatStatus('video');
-  static Audio = new ChatStatus('audio');
-  static Gif = new ChatStatus('gif');
-  static Sticker = new ChatStatus('sticker');
-  static Reaction = new ChatStatus('reaction');
-  // Future types
-  // static File = new ChatStatus(9);
-  // static Post = new ChatStatus(10);
-  // static Contact = new ChatStatus(11);
-  // static Location = new ChatStatus(12);
-  // static Poll = new ChatStatus(13);
-
-  constructor(name) {
-    this.name = name;
-  }
-}
+import * as constants from '../util/constants.js';
 
 export function createNewDatabase() {
   return new sqlite3.Database(path.join(chatMemoryDir, 'Data/remembered.db'), (err) => {
@@ -99,6 +71,36 @@ export function initializeDatabaseTables() {
   });
 }
 
+export async function checkContactExists(contactName) {
+  const query = `SELECT EXISTS(SELECT 1 FROM contacts WHERE nickname LIKE ? LIMIT 1) as ifexists`;
+
+  return new Promise((resolve, reject) => {
+    db.get(query, [contactName], (err, result) => {
+      if (err) {
+        reject(err);
+      } else {
+        console.log(`Contact ${contactName} exists: ${result['ifexists']}`);
+        resolve(result['ifexists'])
+      }
+    });
+  })
+}
+
+export async function getContactIdbyName(contactName) {
+  const query = `SELECT Id contactId FROM contacts WHERE nickname LIKE ? LIMIT 1`;
+
+  return new Promise((resolve, reject) => {
+    db.get(query, [contactName], (err, row) => {
+      if (err) {
+        reject(err);
+      } else {
+        console.log(`Contact ${contactName}'s Id is: ${row.contactId}`);
+        resolve(row.contactId);
+      }
+    });
+  });
+}
+
 export async function insertNewContact(contactName) {
   const query =
     'INSERT INTO contacts(created, last_updated, nickname) VALUES(?,?,?)';
@@ -123,7 +125,7 @@ export async function insertNewContact(contactName) {
     return new Promise((resolve, reject) => {
       if (values.length > 0) {
         console.log('promises values:', values);
-        resolve(values);
+        resolve(values[0]);
       } else {
         reject('##### ERROR: No contact was created from this file.');
       }
@@ -134,13 +136,14 @@ export async function insertNewContact(contactName) {
 export async function insertNewChat(chatTitle, participantIds, platform) {
   const query =
     'INSERT INTO chats(created, last_updated, customTitle, participants, platforms, status) VALUES(?,?,?,?,?,?)';
+  const activeStatus = constants.ChatStatus.Active;
   const values = [
     Date.now(),
     Date.now(),
     chatTitle,
     participantIds,
     platform,
-    ChatStatus.Active.name,
+    activeStatus,
   ];
   let promises = [];
 
@@ -240,12 +243,13 @@ export async function importMsgStaging(messages, senderDic, chatId, platform) {
       }
 
       const decodedText = utf8.decode(content); // decodes symbols and emojis
+      const textMessage = constants.MessageType.Text;
       await insertNewMessage(
         dateSent,
         chatId,
         platform,
         senderId,
-        MessageType.Text.name,
+        textMessage,
         reactionArray,
         decodedText,
         null,
@@ -258,25 +262,27 @@ export async function importMsgStaging(messages, senderDic, chatId, platform) {
       if (sticker != undefined) {
         /* Messenger */
         const stickerUri = sticker.uri;
+        const stickerMessage = contants.MessageType.Sticker;
         await insertNewMessage(
           dateSent,
           chatId,
           platform,
           senderId,
-          MessageType.Sticker.name,
+          stickerMessage,
           reactionArray,
           null,
           stickerUri,
           callbackFn
         );
       } else if (stickerLink != undefined && stickerOwner != undefined) {
+        const stickerMessage = constants.MessageType.Sticker;
         /* Instagram*/
         await insertNewMessage(
           dateSent,
           chatId,
           platform,
           senderId,
-          MessageType.Sticker.name,
+          stickerMessage,
           reactionArray,
           null,
           stickerLink,
@@ -287,12 +293,13 @@ export async function importMsgStaging(messages, senderDic, chatId, platform) {
       // currently each of the media loops creates a new message row for each file. This needs to be refactored to properly support multiple files
       for (let i = 0; i < audioFiles.length; i++) {
         const audioUri = audioFiles[i].uri;
+        const audioMessage = constants.MessageType.Audio;
         await insertNewMessage(
           dateSent,
           chatId,
           platform,
           senderId,
-          MessageType.Audio.name,
+          audioMessage,
           reactionArray,
           null,
           audioUri,
@@ -302,12 +309,13 @@ export async function importMsgStaging(messages, senderDic, chatId, platform) {
     } else if (videoFiles != undefined) {
       for (let i = 0; i < videoFiles.length; i++) {
         const videoUri = videoFiles[i].uri;
+        const videoMessage = constants.MessageType.Video;
         await insertNewMessage(
           dateSent,
           chatId,
           platform,
           senderId,
-          MessageType.Video.name,
+          videoMessage,
           reactionArray,
           null,
           videoUri,
@@ -317,12 +325,13 @@ export async function importMsgStaging(messages, senderDic, chatId, platform) {
     } else if (photoFiles != undefined) {
       for (let i = 0; i < photoFiles.length; i++) {
         const photoUri = photoFiles[i].uri;
+        const photoMessage = constants.MessageType.Photo;
         await insertNewMessage(
           dateSent,
           chatId,
           platform,
           senderId,
-          MessageType.Photo.name,
+          photoMessage,
           reactionArray,
           null,
           photoUri,
@@ -332,12 +341,13 @@ export async function importMsgStaging(messages, senderDic, chatId, platform) {
     } else if (gifs != undefined) {
       for (let i = 0; i < gifs.length; i++) {
         const gifUri = gifs[i].uri;
+        const gifMessage = constants.MessageType.Gif;
         await insertNewMessage(
           dateSent,
           chatId,
           platform,
           senderId,
-          MessageType.Gif.name,
+          gifMessage,
           reactionArray,
           null,
           gifUri,
