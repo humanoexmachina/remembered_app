@@ -2,18 +2,26 @@
 
 import * as fs from 'node:fs';
 import utf8 from 'utf8';
-import {insertNewContact, insertNewChat, importMsgStaging, checkContactExists, getContactIdbyName} from './db.js';
+import {
+  insertNewContact,
+  insertNewChat,
+  importMsgStaging,
+  checkContactExists,
+  getContactIdbyName,
+} from './db.js';
 
-/* enums: https://www.sohamkamani.com/javascript/enums/ */
-
-export async function loadFile(chatFilePath, platform, chatTitle, chatMediaPath) {
-
+export async function loadFile(
+  chatFilePath,
+  platform,
+  chatTitle,
+  chatMediaPath
+) {
   let rawData = await fs.promises.readFile(chatFilePath);
   let parsedFile = JSON.parse(rawData);
   let participants = parsedFile.participants;
   let messages = parsedFile.messages;
 
-  const {participantIds, senderDic} = await getParticipants(participants);
+  const { participantIds, senderDic } = await getParticipants(participants);
 
   let chatId = await insertNewChat(chatTitle, participantIds, platform);
   console.log('newly created chat:', chatId);
@@ -25,7 +33,9 @@ async function getParticipants(participants) {
   let participantId = 0;
   let senderDic = {};
   const numOfParticipants = participants.length;
-  const contactNames = participants.map(participant => utf8.decode(participant.name));
+  const contactNames = participants.map((participant) =>
+    utf8.decode(participant.name)
+  );
 
   if (numOfParticipants > 2) {
     // It is a group chat
@@ -57,7 +67,7 @@ async function getParticipants(participants) {
 
     participantIds.push(participantId);
     /* save senderIds to dictionary to be used in future */
-    senderDic[contactName] = participantId; 
+    senderDic[contactName] = participantId;
   }
 
   console.log('senderDic:', senderDic);
@@ -65,5 +75,5 @@ async function getParticipants(participants) {
   return {
     participantIds,
     senderDic,
-  }
+  };
 }
