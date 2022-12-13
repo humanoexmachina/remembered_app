@@ -3,17 +3,20 @@
 import sqlite3 from 'sqlite3';
 import * as path from 'node:path';
 import utf8 from 'utf8';
-import {db, chatMemoryDir, chatHistoryDir} from '../index.js';
+import { db, chatMemoryDir, chatHistoryDir } from '../index.js';
 import * as constants from '../util/constants.js';
 import * as fs from 'node:fs';
 
 export function createNewDatabase() {
-  return new sqlite3.Database(path.join(chatMemoryDir, 'Data/remembered.db'), (err) => {
+  return new sqlite3.Database(
+    path.join(chatMemoryDir, 'Data/remembered.db'),
+    (err) => {
       if (err) {
         return console.log(err.message);
       }
       console.log('Successfully connected to remembered.db SQLite3 database.');
-    });
+    }
+  );
 }
 
 // Create chats, contacts and message staging tables in the db
@@ -41,7 +44,8 @@ export function initializeDatabaseTables() {
         id INTEGER PRIMARY KEY,
         created INTEGER NOT NULL,
         last_updated INTEGER NOT NULL,
-        nickname TEXT NOT NULL
+        nickname TEXT NOT NULL,
+        profilePicture TEXT
       )`,
       (err) => {
         if (err) {
@@ -81,10 +85,10 @@ export async function checkContactExists(contactName) {
         reject(err);
       } else {
         console.log(`Contact ${contactName} exists: ${result['ifexists']}`);
-        resolve(result['ifexists'])
+        resolve(result['ifexists']);
       }
     });
-  })
+  });
 }
 
 export async function getContactIdbyName(contactName) {
@@ -174,7 +178,13 @@ export async function insertNewChat(chatTitle, participantIds, platform) {
   });
 }
 
-export async function importMsgStaging(messages, senderDic, chatId, platform, chatMediaPath) {
+export async function importMsgStaging(
+  messages,
+  senderDic,
+  chatId,
+  platform,
+  chatMediaPath
+) {
   for (let i = 0; i < messages.length; i++) {
     const message = messages[i];
 
@@ -294,10 +304,17 @@ export async function importMsgStaging(messages, senderDic, chatId, platform, ch
       // currently each of the media loops creates a new message row for each file. This needs to be refactored to properly support multiple files
       for (let i = 0; i < audioFiles.length; i++) {
         const originalAudioUri = path.join(chatHistoryDir, audioFiles[i].uri);
-        const newAudioUri = path.join(chatMediaPath, 'audio', path.basename(originalAudioUri));
+        const newAudioUri = path.join(
+          chatMediaPath,
+          'audio',
+          path.basename(originalAudioUri)
+        );
         await fs.copyFile(originalAudioUri, newAudioUri, (err) => {
           if (err) {
-            console.error(`Can't copy audio file ${originalAudioUri} over`, err);
+            console.error(
+              `Can't copy audio file ${originalAudioUri} over`,
+              err
+            );
           }
         });
 
@@ -317,10 +334,17 @@ export async function importMsgStaging(messages, senderDic, chatId, platform, ch
     } else if (videoFiles != undefined) {
       for (let i = 0; i < videoFiles.length; i++) {
         const originalVideoUri = path.join(chatHistoryDir, videoFiles[i].uri);
-        const newVideoUri = path.join(chatMediaPath, 'videos', path.basename(originalVideoUri));
+        const newVideoUri = path.join(
+          chatMediaPath,
+          'videos',
+          path.basename(originalVideoUri)
+        );
         await fs.copyFile(originalVideoUri, newVideoUri, (err) => {
           if (err) {
-            console.error(`Can't copy video file ${originalVideoUri} over`, err);
+            console.error(
+              `Can't copy video file ${originalVideoUri} over`,
+              err
+            );
           }
         });
 
@@ -340,10 +364,17 @@ export async function importMsgStaging(messages, senderDic, chatId, platform, ch
     } else if (photoFiles != undefined) {
       for (let i = 0; i < photoFiles.length; i++) {
         const originalPhotoUri = path.join(chatHistoryDir, photoFiles[i].uri);
-        const newPhotoUri = path.join(chatMediaPath, 'photos', path.basename(originalPhotoUri));
+        const newPhotoUri = path.join(
+          chatMediaPath,
+          'photos',
+          path.basename(originalPhotoUri)
+        );
         await fs.copyFile(originalPhotoUri, newPhotoUri, (err) => {
           if (err) {
-            console.error(`Can't copy video file ${originalPhotoUri} over`, err);
+            console.error(
+              `Can't copy video file ${originalPhotoUri} over`,
+              err
+            );
           }
         });
 
