@@ -3,7 +3,7 @@
 import sqlite3 from 'sqlite3';
 import * as path from 'node:path';
 import utf8 from 'utf8';
-import {db, chatMemoryDir, chatHistoryDir} from '../index.js';
+import {db, chatMemoryDir, chatHistoryPath} from '../index.js';
 import * as constants from '../util/constants.js';
 import * as fs from 'node:fs';
 
@@ -293,7 +293,7 @@ export async function importMsgStaging(messages, senderDic, chatId, platform, ch
     } else if (audioFiles != undefined) {
       // currently each of the media loops creates a new message row for each file. This needs to be refactored to properly support multiple files
       for (let i = 0; i < audioFiles.length; i++) {
-        const originalAudioUri = path.join(chatHistoryDir, audioFiles[i].uri);
+        const originalAudioUri = path.join(chatHistoryPath, audioFiles[i].uri);
         const newAudioUri = path.join(chatMediaPath, 'audio', path.basename(originalAudioUri));
         await fs.copyFile(originalAudioUri, newAudioUri, (err) => {
           if (err) {
@@ -316,7 +316,7 @@ export async function importMsgStaging(messages, senderDic, chatId, platform, ch
       }
     } else if (videoFiles != undefined) {
       for (let i = 0; i < videoFiles.length; i++) {
-        const originalVideoUri = path.join(chatHistoryDir, videoFiles[i].uri);
+        const originalVideoUri = path.join(chatHistoryPath, videoFiles[i].uri);
         const newVideoUri = path.join(chatMediaPath, 'videos', path.basename(originalVideoUri));
         await fs.copyFile(originalVideoUri, newVideoUri, (err) => {
           if (err) {
@@ -339,7 +339,7 @@ export async function importMsgStaging(messages, senderDic, chatId, platform, ch
       }
     } else if (photoFiles != undefined) {
       for (let i = 0; i < photoFiles.length; i++) {
-        const originalPhotoUri = path.join(chatHistoryDir, photoFiles[i].uri);
+        const originalPhotoUri = path.join(chatHistoryPath, photoFiles[i].uri);
         const newPhotoUri = path.join(chatMediaPath, 'photos', path.basename(originalPhotoUri));
         await fs.copyFile(originalPhotoUri, newPhotoUri, (err) => {
           if (err) {
