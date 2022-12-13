@@ -273,7 +273,7 @@ export async function importMsgStaging(
       if (sticker != undefined) {
         /* Messenger */
         const stickerUri = sticker.uri;
-        const stickerMessage = contants.MessageType.Sticker;
+        const stickerMessage = constants.MessageType.Sticker;
         await insertNewMessage(
           dateSent,
           chatId,
