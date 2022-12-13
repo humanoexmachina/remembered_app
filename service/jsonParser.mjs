@@ -41,7 +41,7 @@ async function getParticipants(participants) {
 
       participantIds.push(participantId);
       /* save senderIds to dictionary to be used in future */
-      senderDic[contactName] = participantId[0];
+      senderDic[contactName] = participantId;
     }
   } else {
     // It is a 1-1 chat and user's name seems to be always the last, so only save the first one if it doesn't exist
@@ -57,7 +57,7 @@ async function getParticipants(participants) {
 
     participantIds.push(participantId);
     /* save senderIds to dictionary to be used in future */
-    senderDic[contactName] = participantId[0]; 
+    senderDic[contactName] = participantId; 
   }
 
   console.log('senderDic:', senderDic);
