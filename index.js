@@ -8,19 +8,15 @@ import {isNotJunk} from 'junk';
 
 import {loadFile} from './service/jsonParser.mjs';
 import {createNewDatabase, initializeDatabaseTables} from './service/db.js';
+import { ChatPlatform } from './util/constants.js';
 
 // TODO: Move under system APPDATA directory later
 export const chatMemoryDir = `/Users/alicewang913/Documents/Remembered/ChatMemory`;
+export const chatHistoryDir = `/Users/alicewang913/Documents/Memory/alice_wwwww913_ins_JSON`;
 let chatHistoryPath = `/Users/alicewang913/Documents/Memory/alice_wwwww913_ins_JSON`;
 // let chatHistoryPath = `/Users/alicewang913/Documents/Memory/alice_wwwww913_20221123.zip`;
 // let chatHistoryPath = `/Users/alicewang913/Documents/Memory/facebook-jiannanwang54.zip`;
 // let chatHistoryPath = `/Users/alicewang913/Documents/Memory/alice_wwwww913_ins_JSON_small_test`;
-
-const ChatPlatform = {
-  Unknown : "unknown",
-  Messenger : "messenger",
-  Instagram : "instagram"
-}
 
 const JSON = `.json`;
 
@@ -63,10 +59,17 @@ if (fs.existsSync(path.join(chatHistoryPath, `past_instagram_insights`))) {
   throw new Error("Seems like there is no chat history to be read");
 }
 
-/* Open Database */
+// Create media folder
+let chatMediaDir = path.join(chatMemoryDir, `Media`);
+if (!fs.existsSync(chatMediaDir)) {
+  fs.mkdirSync(chatMediaDir, {recursive: true});
+}
+
+// Create data folder
 if (!fs.existsSync(path.join(chatMemoryDir, `Data`))) {
   fs.mkdirSync(path.join(chatMemoryDir, `Data`), {recursive: true});
 }
+/* Open Database */
 export var db = createNewDatabase();
 
 /* Create data tables */
@@ -90,6 +93,12 @@ switch (chatPlatform) {
       const selectedContacts = sortedContacts;
       
       for (let chatContact of selectedContacts.keys()) {
+        // Create media folders for each chat
+        const chatMediaPath = path.join(chatMediaDir, chatContact);
+        fs.mkdirSync(path.join(chatMediaPath, 'photos'), {recursive: true});
+        fs.mkdirSync(path.join(chatMediaPath, 'audio'), {recursive: true});
+        fs.mkdirSync(path.join(chatMediaPath, 'videos'), {recursive: true});
+  
         // parse each json in the chat folder
         let chatFiles = fs.readdirSync(path.join(inboxDir, chatContact)).filter(file => {
           return path.extname(file) == JSON;
@@ -97,7 +106,7 @@ switch (chatPlatform) {
         
         for (let chatFile of chatFiles) {
           let chatFilePath = path.join(inboxDir, chatContact, chatFile);
-          await loadFile(chatFilePath, chatPlatform, chatContact);
+          await loadFile(chatFilePath, chatPlatform, chatContact, chatMediaPath);
           console.log(`Finish parsing ${chatFilePath}`);
           console.log(`Saving all multi-media files to disk`);
         }

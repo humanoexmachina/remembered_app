@@ -1,3 +1,9 @@
+export const ChatPlatform = {
+    Unknown : "unknown",
+    Messenger : "messenger",
+    Instagram : "instagram"
+  }
+
 export const ChatStatus = {
     Active: "active",
     Archived: "archived"

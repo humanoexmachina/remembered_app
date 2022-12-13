@@ -6,7 +6,7 @@ import {insertNewContact, insertNewChat, importMsgStaging, checkContactExists, g
 
 /* enums: https://www.sohamkamani.com/javascript/enums/ */
 
-export async function loadFile(chatFilePath, platform, chatTitle) {
+export async function loadFile(chatFilePath, platform, chatTitle, chatMediaPath) {
 
   let rawData = await fs.promises.readFile(chatFilePath);
   let parsedFile = JSON.parse(rawData);
@@ -17,7 +17,7 @@ export async function loadFile(chatFilePath, platform, chatTitle) {
 
   let chatId = await insertNewChat(chatTitle, participantIds, platform);
   console.log('newly created chat:', chatId);
-  importMsgStaging(messages, senderDic, chatId, platform);
+  importMsgStaging(messages, senderDic, chatId, platform, chatMediaPath);
 }
 
 async function getParticipants(participants) {

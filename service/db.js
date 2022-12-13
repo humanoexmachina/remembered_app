@@ -3,8 +3,9 @@
 import sqlite3 from 'sqlite3';
 import * as path from 'node:path';
 import utf8 from 'utf8';
-import {db, chatMemoryDir} from '../index.js';
+import {db, chatMemoryDir, chatHistoryDir} from '../index.js';
 import * as constants from '../util/constants.js';
+import * as fs from 'node:fs';
 
 export function createNewDatabase() {
   return new sqlite3.Database(path.join(chatMemoryDir, 'Data/remembered.db'), (err) => {
@@ -173,7 +174,7 @@ export async function insertNewChat(chatTitle, participantIds, platform) {
   });
 }
 
-export async function importMsgStaging(messages, senderDic, chatId, platform) {
+export async function importMsgStaging(messages, senderDic, chatId, platform, chatMediaPath) {
   for (let i = 0; i < messages.length; i++) {
     const message = messages[i];
 
@@ -292,7 +293,14 @@ export async function importMsgStaging(messages, senderDic, chatId, platform) {
     } else if (audioFiles != undefined) {
       // currently each of the media loops creates a new message row for each file. This needs to be refactored to properly support multiple files
       for (let i = 0; i < audioFiles.length; i++) {
-        const audioUri = audioFiles[i].uri;
+        const originalAudioUri = path.join(chatHistoryDir, audioFiles[i].uri);
+        const newAudioUri = path.join(chatMediaPath, 'audio', path.basename(originalAudioUri));
+        await fs.copyFile(originalAudioUri, newAudioUri, (err) => {
+          if (err) {
+            console.error(`Can't copy audio file ${originalAudioUri} over`, err);
+          }
+        });
+
         const audioMessage = constants.MessageType.Audio;
         await insertNewMessage(
           dateSent,
@@ -302,13 +310,20 @@ export async function importMsgStaging(messages, senderDic, chatId, platform) {
           audioMessage,
           reactionArray,
           null,
-          audioUri,
+          newAudioUri,
           callbackFn
         );
       }
     } else if (videoFiles != undefined) {
       for (let i = 0; i < videoFiles.length; i++) {
-        const videoUri = videoFiles[i].uri;
+        const originalVideoUri = path.join(chatHistoryDir, videoFiles[i].uri);
+        const newVideoUri = path.join(chatMediaPath, 'videos', path.basename(originalVideoUri));
+        await fs.copyFile(originalVideoUri, newVideoUri, (err) => {
+          if (err) {
+            console.error(`Can't copy video file ${originalVideoUri} over`, err);
+          }
+        });
+
         const videoMessage = constants.MessageType.Video;
         await insertNewMessage(
           dateSent,
@@ -318,13 +333,20 @@ export async function importMsgStaging(messages, senderDic, chatId, platform) {
           videoMessage,
           reactionArray,
           null,
-          videoUri,
+          newVideoUri,
           callbackFn
         );
       }
     } else if (photoFiles != undefined) {
       for (let i = 0; i < photoFiles.length; i++) {
-        const photoUri = photoFiles[i].uri;
+        const originalPhotoUri = path.join(chatHistoryDir, photoFiles[i].uri);
+        const newPhotoUri = path.join(chatMediaPath, 'photos', path.basename(originalPhotoUri));
+        await fs.copyFile(originalPhotoUri, newPhotoUri, (err) => {
+          if (err) {
+            console.error(`Can't copy video file ${originalPhotoUri} over`, err);
+          }
+        });
+
         const photoMessage = constants.MessageType.Photo;
         await insertNewMessage(
           dateSent,
@@ -334,7 +356,7 @@ export async function importMsgStaging(messages, senderDic, chatId, platform) {
           photoMessage,
           reactionArray,
           null,
-          photoUri,
+          newPhotoUri,
           callbackFn
         );
       }
