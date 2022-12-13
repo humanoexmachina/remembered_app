@@ -12,8 +12,7 @@ import { ChatPlatform } from './util/constants.js';
 
 // TODO: Move under system APPDATA directory later
 export const chatMemoryDir = `/Users/alicewang913/Documents/Remembered/ChatMemory`;
-export const chatHistoryDir = `/Users/alicewang913/Documents/Memory/alice_wwwww913_ins_JSON`;
-let chatHistoryPath = `/Users/alicewang913/Documents/Memory/alice_wwwww913_ins_JSON`;
+export let chatHistoryPath = `/Users/alicewang913/Documents/Memory/alice_wwwww913_ins_JSON`;
 // let chatHistoryPath = `/Users/alicewang913/Documents/Memory/alice_wwwww913_20221123.zip`;
 // let chatHistoryPath = `/Users/alicewang913/Documents/Memory/facebook-jiannanwang54.zip`;
 // let chatHistoryPath = `/Users/alicewang913/Documents/Memory/alice_wwwww913_ins_JSON_small_test`;
