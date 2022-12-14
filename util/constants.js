@@ -1,4 +1,5 @@
 /* enums: https://www.sohamkamani.com/javascript/enums/ */
+
 export const ChatPlatform = {
   Unknown: 'unknown',
   Messenger: 'messenger',
