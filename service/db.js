@@ -1,11 +1,12 @@
 'use strict';
 
+import utf8 from 'utf8';
 import sqlite3 from 'sqlite3';
 import * as path from 'node:path';
-import utf8 from 'utf8';
+import * as fs from 'node:fs';
+
 import { db, appDataDir } from '../index.js';
 import * as constants from '../util/constants.js';
-import * as fs from 'node:fs';
 
 export function connectRememberedDB() {
   return new sqlite3.Database(path.join(appDataDir, 'remembered.db'), (err) => {
@@ -22,7 +23,7 @@ export function closeRememberedDB() {
     if (err) {
       console.error(err.message);
     }
-    console.log('Close the database connection.');
+    console.log('Successfully closed the database connection.');
   });
 }
 // Create chats, contacts and message staging tables in the db
@@ -90,7 +91,7 @@ export async function checkContactExists(contactName) {
       if (err) {
         reject(err);
       } else {
-        console.log(`Contact ${contactName} exists: ${result['ifexists']}`);
+        // console.log(`Contact ${contactName} exists?: ${result['ifexists']}`);
         resolve(result['ifexists']);
       }
     });
@@ -105,7 +106,7 @@ export async function getContactIdbyName(contactName) {
       if (err) {
         reject(err);
       } else {
-        console.log(`Contact ${contactName}'s Id is: ${row.contactId}`);
+        // console.log(`Contact ${contactName}'s Id is: ${row.contactId}`);
         resolve(row.contactId);
       }
     });
@@ -125,7 +126,7 @@ export async function insertNewContact(contactName) {
           console.log('##### ERROR insertNewContact:', error);
           reject(error);
         } else {
-          console.log('id from insertNewContact:', this.lastID);
+          // console.log('id from insertNewContact:', this.lastID);
           resolve(this.lastID);
         }
       });
@@ -135,7 +136,6 @@ export async function insertNewContact(contactName) {
   return Promise.all(promises).then((values) => {
     return new Promise((resolve, reject) => {
       if (values.length > 0) {
-        console.log('promises values:', values);
         resolve(values[0]);
       } else {
         reject('##### ERROR: No contact was created from this file.');
@@ -165,7 +165,7 @@ export async function insertNewChat(chatTitle, participantIds, platform) {
           console.log('##### ERROR insertNewChat:', error);
           reject(error);
         } else {
-          console.log('id from insertNewChat:', this.lastID);
+          // console.log('id from insertNewChat:', this.lastID);
           resolve(this.lastID);
         }
       });
@@ -175,7 +175,7 @@ export async function insertNewChat(chatTitle, participantIds, platform) {
   return Promise.all(promises).then((values) => {
     return new Promise((resolve, reject) => {
       if (values.length > 0) {
-        console.log('promises values:', values);
+        // console.log('promises values:', values);
         resolve(values);
       } else {
         reject('##### ERROR: No chat was created from this file.');

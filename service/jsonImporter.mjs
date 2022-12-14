@@ -2,93 +2,117 @@
 
 import * as fs from 'node:fs';
 import utf8 from 'utf8';
-import * as dbService from './db.js';
+import * as path from 'node:path';
 
-export async function bulkImportChats(platform, chatFiles) {
-  for (let chatFile of chatFiles) {
-    let chatFilePath = path.join(inboxDir, chat, chatFile);
-    await importSingleChat(chatFilePath, platform, chat, chatMediaPath);
-    console.log(`Finish parsing ${chatFilePath}`);
-    console.log(`Saving all multi-media files to disk`);
-  }
-}
+import * as dbService from './db.js';
+import * as index from '../index.js';
+import * as K from '../util/constants.js';
 
 export async function importSingleChat(
-  chatFilePath,
-  platform,
   chatTitle,
-  chatMediaPath
+  chatMediaPath,
+  chatFilePaths
 ) {
-  let rawData = await fs.promises.readFile(chatFilePath);
-  let parsedFile = JSON.parse(rawData);
-  let participants = parsedFile.participants;
-  let messages = parsedFile.messages;
+  console.log('%%% Starting import of the following chat %%%');
+  console.log('chatTitle:', chatTitle);
+  console.log('chatMediaPath:', chatMediaPath);
+  // console.log('chatFilePaths:', chatFilePaths);
 
-  const { participantIds, senderDic } = await getParticipants(participants);
+  let allUniqueParticipants = new Set();
+  let allMessages = [];
+
+  /* Loop to support if there is more than one chat file to import */
+  for (let chatFile of chatFilePaths) {
+    console.log('processing chatFile:', chatFile);
+
+    let rawData = await fs.promises.readFile(chatFile);
+    let parsedFile = JSON.parse(rawData);
+    let messages = parsedFile.messages;
+
+    /* push participants to set */
+    let participants = parsedFile.participants;
+    // console.log('participants:', participants);
+
+    for (let participant of participants) {
+      allUniqueParticipants.add(utf8.decode(participant.name));
+    }
+
+    /* push messages into array */
+    allMessages.push(...messages);
+  }
+
+  console.log('allUniqueParticipants:', allUniqueParticipants);
+  console.log('allMessages.length:', allMessages.length);
+
+  const { contactIds, senderDic } = await createMatchContacts(
+    Array.from(allUniqueParticipants)
+  );
+
+  // console.log('contactIds:', contactIds);
+  // console.log('senderDic', senderDic);
 
   let chatId = await dbService.insertNewChat(
     chatTitle,
-    participantIds,
-    platform
+    contactIds,
+    index.chatPlatform
   );
   console.log('newly created chat:', chatId);
-  dbService.importMsgStaging(
-    messages,
+
+  importMsgStaging(
+    allMessages,
     senderDic,
     chatId,
-    platform,
+    index.chatPlatform,
     chatMediaPath
   );
   console.log('completed import session');
-  dbService.closeRememberedDB();
 }
 
-async function getParticipants(participants) {
-  let participantIds = [];
-  let participantId = 0;
+async function createMatchContacts(participants) {
+  console.log('%%% Start creating/matching of Contacts %%%');
+
+  let contactIds = [];
   let senderDic = {};
   const numOfParticipants = participants.length;
-  const contactNames = participants.map((participant) =>
-    utf8.decode(participant.name)
-  );
 
   if (numOfParticipants > 2) {
+    let contactId = 0;
+
     // It is a group chat
-    for (const contactName of contactNames) {
+    for (const contactName of participants) {
+      console.log('processing participant:', contactName);
       if (!(await dbService.checkContactExists(contactName))) {
-        console.log(`inserting ${contactName} into DB`);
-        participantId = await dbService.insertNewContact(contactName); // this is an array
-        console.log('participantId:', participantId);
+        // console.log(`inserting ${contactName} into DB`);
+        contactId = await dbService.insertNewContact(contactName); // returned value is an array of one element
+        // console.log('contactId:', contactId);
       } else {
-        participantId = await dbService.getContactIdbyName(contactName);
-        console.log(`Contact ${contactName} already exists`);
+        // console.log(`Contact ${contactName} already exists`);
+        contactId = await dbService.getContactIdbyName(contactName);
       }
 
-      participantIds.push(participantId);
-      /* save senderIds to dictionary to be used in future */
-      senderDic[contactName] = participantId;
+      contactIds.push(contactId);
+      senderDic[contactName] = contactId;
     }
   } else {
-    // It is a 1-1 chat and user's name seems to be always the last, so only save the first one if it doesn't exist
-    const contactName = contactNames[0];
-    if (!(await dbService.checkContactExists(contactName))) {
-      console.log(`inserting ${contactName} into DB`);
+    let contactId = 0;
 
-      participantId = await dbService.insertNewContact(contactName); // this is an array
-      console.log('participantId:', participantId);
+    // It is a 1-1 chat and user's name seems to be always the last, so only save the first one if it doesn't exist
+    const contactName = participants[0];
+    if (!(await dbService.checkContactExists(contactName))) {
+      // console.log(`inserting ${contactName} into DB`);
+      contactId = await dbService.insertNewContact(contactName); // returned value is an array of one element
+      // console.log('contactId:', contactId);
     } else {
-      participantId = await dbService.getContactIdbyName(contactName);
+      // console.log(`Contact ${contactName} already exists`);
+      contactId = await dbService.getContactIdbyName(contactName);
     }
 
-    participantIds.push(participantId);
-    /* save senderIds to dictionary to be used in future */
-    senderDic[contactName] = participantId;
+    contactIds.push(contactId);
+    senderDic[contactName] = contactId;
   }
 
-  console.log('senderDic:', senderDic);
-  console.log('final participantIds:', participantIds);
   return {
-    participantIds,
+    contactIds,
     senderDic,
   };
 }
@@ -100,6 +124,7 @@ export async function importMsgStaging(
   platform,
   chatMediaPath
 ) {
+  console.log('%%% Starting import of messages into Staging DB %%%');
   for (let i = 0; i < messages.length; i++) {
     const message = messages[i];
 
@@ -107,7 +132,6 @@ export async function importMsgStaging(
     const senderName = utf8.decode(message.sender_name);
     const senderId =
       senderDic[senderName] != undefined ? senderDic[senderName] : 0;
-    console.log(senderId);
     const dateSent = message.timestamp_ms;
     const content = message.content;
 
@@ -169,8 +193,8 @@ export async function importMsgStaging(
       }
 
       const decodedText = utf8.decode(content); // decodes symbols and emojis
-      const textMessage = constants.MessageType.Text;
-      await insertNewMessage(
+      const textMessage = K.MessageType.Text;
+      await dbService.insertNewMessage(
         dateSent,
         chatId,
         platform,
@@ -188,8 +212,8 @@ export async function importMsgStaging(
       if (sticker != undefined) {
         /* Messenger */
         const stickerUri = sticker.uri;
-        const stickerMessage = constants.MessageType.Sticker;
-        await insertNewMessage(
+        const stickerMessage = K.MessageType.Sticker;
+        await dbService.insertNewMessage(
           dateSent,
           chatId,
           platform,
@@ -201,9 +225,9 @@ export async function importMsgStaging(
           callbackFn
         );
       } else if (stickerLink != undefined && stickerOwner != undefined) {
-        const stickerMessage = constants.MessageType.Sticker;
+        const stickerMessage = K.MessageType.Sticker;
         /* Instagram*/
-        await insertNewMessage(
+        await dbService.insertNewMessage(
           dateSent,
           chatId,
           platform,
@@ -218,13 +242,16 @@ export async function importMsgStaging(
     } else if (audioFiles != undefined) {
       // currently each of the media loops creates a new message row for each file. This needs to be refactored to properly support multiple files
       for (let i = 0; i < audioFiles.length; i++) {
-        const originalAudioUri = path.join(chatHistoryDir, audioFiles[i].uri);
+        const originalAudioUri = path.join(
+          index.importDataPath,
+          audioFiles[i].uri
+        );
         const newAudioUri = path.join(
           chatMediaPath,
           'audio',
           path.basename(originalAudioUri)
         );
-        await fs.copyFile(originalAudioUri, newAudioUri, (err) => {
+        fs.copyFile(originalAudioUri, newAudioUri, (err) => {
           if (err) {
             console.error(
               `Can't copy audio file ${originalAudioUri} over`,
@@ -233,8 +260,8 @@ export async function importMsgStaging(
           }
         });
 
-        const audioMessage = constants.MessageType.Audio;
-        await insertNewMessage(
+        const audioMessage = K.MessageType.Audio;
+        await dbService.insertNewMessage(
           dateSent,
           chatId,
           platform,
@@ -248,13 +275,16 @@ export async function importMsgStaging(
       }
     } else if (videoFiles != undefined) {
       for (let i = 0; i < videoFiles.length; i++) {
-        const originalVideoUri = path.join(chatHistoryDir, videoFiles[i].uri);
+        const originalVideoUri = path.join(
+          index.importDataPath,
+          videoFiles[i].uri
+        );
         const newVideoUri = path.join(
           chatMediaPath,
           'videos',
           path.basename(originalVideoUri)
         );
-        await fs.copyFile(originalVideoUri, newVideoUri, (err) => {
+        fs.copyFile(originalVideoUri, newVideoUri, (err) => {
           if (err) {
             console.error(
               `Can't copy video file ${originalVideoUri} over`,
@@ -263,8 +293,8 @@ export async function importMsgStaging(
           }
         });
 
-        const videoMessage = constants.MessageType.Video;
-        await insertNewMessage(
+        const videoMessage = K.MessageType.Video;
+        await dbService.insertNewMessage(
           dateSent,
           chatId,
           platform,
@@ -278,13 +308,16 @@ export async function importMsgStaging(
       }
     } else if (photoFiles != undefined) {
       for (let i = 0; i < photoFiles.length; i++) {
-        const originalPhotoUri = path.join(chatHistoryDir, photoFiles[i].uri);
+        const originalPhotoUri = path.join(
+          index.importDataPath,
+          photoFiles[i].uri
+        );
         const newPhotoUri = path.join(
           chatMediaPath,
           'photos',
           path.basename(originalPhotoUri)
         );
-        await fs.copyFile(originalPhotoUri, newPhotoUri, (err) => {
+        fs.copyFile(originalPhotoUri, newPhotoUri, (err) => {
           if (err) {
             console.error(
               `Can't copy video file ${originalPhotoUri} over`,
@@ -293,8 +326,8 @@ export async function importMsgStaging(
           }
         });
 
-        const photoMessage = constants.MessageType.Photo;
-        await insertNewMessage(
+        const photoMessage = K.MessageType.Photo;
+        await dbService.insertNewMessage(
           dateSent,
           chatId,
           platform,
@@ -309,8 +342,8 @@ export async function importMsgStaging(
     } else if (gifs != undefined) {
       for (let i = 0; i < gifs.length; i++) {
         const gifUri = gifs[i].uri;
-        const gifMessage = constants.MessageType.Gif;
-        await insertNewMessage(
+        const gifMessage = K.MessageType.Gif;
+        await dbService.insertNewMessage(
           dateSent,
           chatId,
           platform,
@@ -323,7 +356,7 @@ export async function importMsgStaging(
         );
       }
     } else {
-      await insertNewMessage(
+      await dbService.insertNewMessage(
         dateSent,
         chatId,
         platform,

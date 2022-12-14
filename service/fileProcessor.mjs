@@ -33,6 +33,7 @@ export function unZip() {
   } else if (chatHistoryStats.isDirectory()) {
     // users uploaded a chat history directory
     console.log(`Users uploaded a chat history directory`);
+    return index.userImportedFilePath;
   } else {
     throw new Error(
       `Please upload the original chat history file downloaded from chat apps`
@@ -95,7 +96,7 @@ export async function sortChats() {
       // sort chats by the directory size to gauge the importance of contacts
       const chatSizeMap = new Map();
       const chatDirNames = fs.readdirSync(index.inboxDir).filter(isNotJunk);
-      console.log('chatDirNames:', chatDirNames);
+      // console.log('chatDirNames:', chatDirNames);
 
       for (const chatDirName of chatDirNames) {
         chatSizeMap.set(
@@ -103,12 +104,12 @@ export async function sortChats() {
           await getFolderSize.loose(path.join(index.inboxDir, chatDirName))
         );
       }
-      console.log('chatSizeMap:', chatSizeMap);
+      // console.log('chatSizeMap:', chatSizeMap);
 
       const sortedChatDirNames = new Map(
         [...chatSizeMap.entries()].sort((a, b) => b[1] - a[1])
       );
-      console.log('sortedChatDirNames:', sortedChatDirNames);
+      // console.log('sortedChatDirNames:', sortedChatDirNames);
 
       const chatMap = new Map();
 
@@ -156,13 +157,13 @@ export async function getChatFiles() {
           .filter((file) => {
             return path.extname(file) == '.json';
           });
-        console.log('jsonFilePath:', path.join(index.inboxDir, chatName));
-        console.log('jsonFileNames:', jsonFileNames);
+        // console.log('jsonFilePath:', path.join(index.inboxDir, chatName));
+        // console.log('jsonFileNames:', jsonFileNames);
 
         // get the full chat JSON file paths that can be used for import
         for (let chatFile of jsonFileNames) {
           let filePath = path.join(index.inboxDir, chatName, chatFile);
-          console.log('filePath:', filePath);
+          // console.log('filePath:', filePath);
 
           index.chatMap.get(chatName).chatFilePaths.push(filePath);
         }
@@ -170,12 +171,3 @@ export async function getChatFiles() {
       break;
   }
 }
-
-// await importer.importChat(
-//   chatFilePath,
-//   platform,
-//   chatName,
-//   chatMediaPath
-// );
-// console.log(`Finish parsing ${chatFilePath}`);
-// console.log(`Saving all multi-media files to disk`);

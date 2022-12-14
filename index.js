@@ -1,16 +1,15 @@
 'use strict';
 
-import * as importer from './service/jsonImporter.mjs';
+import * as jsonImporter from './service/jsonImporter.mjs';
 import * as fileProcessor from './service/fileProcessor.mjs';
 import * as dbService from './service/db.js';
 import * as K from './util/constants.js';
 
+/* user - CHANGE THESE MANUALLY FOR NOW! */
 // TODO: Move under system APPDATA directory later
-export let chatPlatform = K.ChatPlatform.Instagram;
-
-/* user */
+export let chatPlatform = K.ChatPlatform.Messenger;
 export const appDataDir = `appdata`;
-export const userImportedFilePath = `files/arainyspringday_20221214.zip`;
+export const userImportedFilePath = `files/facebook-shicyu.zip`;
 
 /* Import Session */
 export let importDataPath = null;
@@ -26,24 +25,10 @@ export function chatObject(name, size) {
   this.chatFilePaths = [];
 }
 
-// let chatOne = new chatObject('name', null, null, null);
-
-// chatMap.set(chatOne.name, chatOne);
-// console.log(chatOne);
-// console.log(chatMap);
-
-// chatMap.get(chatOne.name).size = 10;
-
-// console.log(chatMap);
-// console.log(chatOne);
-
-// let chatHistoryPath = `/Users/alicewang913/Documents/Memory/alice_wwwww913_20221123.zip`;
-// let chatHistoryPath = `/Users/alicewang913/Documents/Memory/facebook-jiannanwang54.zip`;
-// let chatHistoryPath = `/Users/alicewang913/Documents/Memory/alice_wwwww913_ins_JSON_small_test`;
-
 importDataPath = fileProcessor.unZip();
-console.log('chatHistoryPath:', importDataPath);
+console.log('importDataPath:', importDataPath);
 
+/* Confirm that there is a messages/inbox to work with */
 try {
   inboxDir = fileProcessor.validateChatFolder();
   console.log('inboxDir:', inboxDir);
@@ -51,6 +36,7 @@ try {
   console.log(error);
 }
 
+/* Create Media folder */
 mediaDir = fileProcessor.createStorageLocations(appDataDir);
 console.log('chatMediaDir:', mediaDir);
 
@@ -60,11 +46,30 @@ db = dbService.connectRememberedDB();
 /* Create data tables */
 dbService.initializeDatabaseTables();
 
+/* Sort chats by size */
 chatMap = await fileProcessor.sortChats();
-console.log('chatMap:', chatMap);
+// console.log('chatMap:', chatMap);
 
+/* Create subfolders under Media folder for each chat for audio, video and photo */
 await fileProcessor.createChatMediaFolders();
-console.log('chatMap:', chatMap);
+// console.log('chatMap:', chatMap);
 
+/* Get the file paths of all the message files */
 await fileProcessor.getChatFiles();
-console.log('chatMap:', chatMap);
+// console.log('chatMap:', chatMap);
+
+/* Start import process for each chat */
+for (let chatName of chatMap.keys()) {
+  console.log(`\n --- importing ${chatName} ---`);
+  await jsonImporter.importSingleChat(
+    chatName,
+    chatMap.get(chatName).mediaPath,
+    chatMap.get(chatName).chatFilePaths
+  );
+  console.log(
+    `Finished importing ${chatName}. Saved all multi-media files to disk`
+  );
+}
+
+console.log('$$$$$ Closing DB $$$$$$');
+dbService.closeRememberedDB();
