@@ -7,9 +7,9 @@ import * as K from './util/constants.js';
 
 /* user - CHANGE THESE MANUALLY FOR NOW! */
 // TODO: Move under system APPDATA directory later
-export let chatPlatform = K.ChatPlatform.Messenger;
-export const appDataDir = `appdata`;
-export const userImportedFilePath = `files/facebook-shicyu.zip`;
+export let chatPlatform = K.ChatPlatform.Unknown;
+export const appDataDir = `/Users/alicewang913/Documents/Remembered`;
+export const userImportedFilePath = `/Users/alicewang913/Documents/Memory/facebook-jiannanwang54.zip`;
 
 /* Import Session */
 export let importDataPath = null;
@@ -27,6 +27,13 @@ export function chatObject(name, size) {
 
 importDataPath = fileProcessor.unZip();
 console.log('importDataPath:', importDataPath);
+
+/* Detect chat platfrom */
+try {
+  chatPlatform = fileProcessor.detectPlatform(importDataPath);
+} catch (error) {
+  console.error(error);
+}
 
 /* Confirm that there is a messages/inbox to work with */
 try {
@@ -61,8 +68,19 @@ await fileProcessor.getChatFiles();
 /* Start import process for each chat */
 for (let chatName of chatMap.keys()) {
   console.log(`\n --- importing ${chatName} ---`);
+  let customTitle = chatName.split('_')[0];
+  let messengerChatID = '';
+  let instagramChatID = '';
+  
+  if (chatPlatform == K.ChatPlatform.Messenger) {
+    messengerChatID = chatName;
+  } else if (chatPlatform == K.ChatPlatform.Instagram) {
+    instagramChatID = chatName;
+  }
   await jsonImporter.importSingleChat(
-    chatName,
+    customTitle,
+    messengerChatID,
+    instagramChatID,
     chatMap.get(chatName).mediaPath,
     chatMap.get(chatName).chatFilePaths
   );

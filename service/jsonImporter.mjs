@@ -10,6 +10,8 @@ import * as K from '../util/constants.js';
 
 export async function importSingleChat(
   chatTitle,
+  messengerChatID,
+  instagramChatID,
   chatMediaPath,
   chatFilePaths
 ) {
@@ -53,6 +55,8 @@ export async function importSingleChat(
 
   let chatId = await dbService.insertNewChat(
     chatTitle,
+    messengerChatID,
+    instagramChatID,
     contactIds,
     index.chatPlatform
   );

@@ -41,22 +41,20 @@ export function unZip() {
   }
 }
 
-/* currently not being used
 export function detectPlatform(chatHistoryPath) {
   // Determine the source of the chat history
   if (fs.existsSync(path.join(chatHistoryPath, `past_instagram_insights`))) {
     // chat history is from Instagram
     console.log('Chat history is from Instagram');
-    chatPlatform = ChatPlatform.Instagram;
+    return K.ChatPlatform.Instagram;
   } else if (fs.existsSync(path.join(chatHistoryPath, `messages`))) {
     // chat history is from Messenger
     console.log('Chat history is from Messenger');
-    chatPlatform = ChatPlatform.Messenger;
+    return K.ChatPlatform.Messenger;
   } else {
-    throw new Error('Seems like there is no chat history to be read');
+    throw new Error('Unknown platform: cannot read chat history.');
   }
 }
-*/
 
 export function validateChatFolder() {
   switch (index.chatPlatform) {

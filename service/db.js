@@ -1,10 +1,7 @@
 'use strict';
 
-import utf8 from 'utf8';
 import sqlite3 from 'sqlite3';
 import * as path from 'node:path';
-import * as fs from 'node:fs';
-
 import { db, appDataDir } from '../index.js';
 import * as constants from '../util/constants.js';
 
@@ -35,6 +32,8 @@ export function initializeDatabaseTables() {
         created INTEGER NOT NULL,
         last_updated INTEGER NOT NULL,
         customTitle TEXT NOT NULL,
+        messengerChatID TEXT NOT NULL,
+        instagramChatID TEXT NOT NULL,
         participants TEXT NOT NULL,
         platforms TEXT NOT NULL,
         status INTEGER NOT NULL
@@ -144,14 +143,16 @@ export async function insertNewContact(contactName) {
   });
 }
 
-export async function insertNewChat(chatTitle, participantIds, platform) {
+export async function insertNewChat(chatTitle, messengerChatID, instagramChatID, participantIds, platform) {
   const query =
-    'INSERT INTO chats(created, last_updated, customTitle, participants, platforms, status) VALUES(?,?,?,?,?,?)';
+    'INSERT INTO chats(created, last_updated, customTitle, messengerChatID, instagramChatID, participants, platforms, status) VALUES(?,?,?,?,?,?,?,?)';
   const activeStatus = constants.ChatStatus.Active;
   const values = [
     Date.now(),
     Date.now(),
     chatTitle,
+    messengerChatID,
+    instagramChatID,
     participantIds,
     platform,
     activeStatus,
