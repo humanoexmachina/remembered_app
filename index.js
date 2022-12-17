@@ -9,7 +9,7 @@ import * as K from './util/constants.js';
 // TODO: Move under system APPDATA directory later
 export let chatPlatform = K.ChatPlatform.Unknown;
 export const appDataDir = `/Users/alicewang913/Documents/Remembered`;
-export const userImportedFilePath = `/Users/alicewang913/Documents/Memory/facebook-jiannanwang54.zip`;
+export const userImportedFilePath = `/Users/alicewang913/Documents/Memory/alice_wwwww913_ins_JSON`;
 
 /* Import Session */
 export let importDataPath = null;

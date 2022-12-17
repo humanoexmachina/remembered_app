@@ -6,7 +6,9 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "server": "node index.js",
+    "client": "npm run start --prefix remembered_ui",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
   },
   "repository": {
     "type": "git",
@@ -20,6 +22,7 @@
   "homepage": "https://github.com/humanoexmachina/remembered_app#readme",
   "dependencies": {
     "adm-zip": "^0.5.9",
+    "concurrently": "^7.6.0",
     "get-folder-size": "^4.0.0",
     "junk": "^4.0.0",
     "sqlite3": "^5.1.2",
