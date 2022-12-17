@@ -1,10 +1,14 @@
+/* Import React and ReactDOM libraries */
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+// Create the root component
 const root = ReactDOM.createRoot(document.getElementById('root'));
+
+// Show the App component on the screen
 root.render(
   <React.StrictMode>
     <App />
