@@ -1,15 +1,15 @@
 'use strict';
 
-import * as jsonImporter from './service/jsonImporter.mjs';
-import * as fileProcessor from './service/fileProcessor.mjs';
+import * as jsonImporter from './service/jsonImporter.js';
+import * as fileProcessor from './service/fileProcessor.js';
 import * as dbService from './service/db.js';
 import * as K from './util/constants.js';
 
 /* user - CHANGE THESE MANUALLY FOR NOW! */
 // TODO: Move under system APPDATA directory later
 export let chatPlatform = K.ChatPlatform.Unknown;
-export const appDataDir = `/Users/alicewang913/Documents/Remembered`;
-export const userImportedFilePath = `/Users/alicewang913/Documents/Memory/alice_wwwww913_ins_JSON`;
+export const appDataDir = `../userEnv/appData`; // there is a wiki for setting this with electron
+export const userImportedFilePath = `../userEnv/files/arainyspringday_20221216.zip`;
 
 /* Import Session */
 export let importDataPath = null;
@@ -71,7 +71,7 @@ for (let chatName of chatMap.keys()) {
   let customTitle = chatName.split('_')[0];
   let messengerChatID = '';
   let instagramChatID = '';
-  
+
   if (chatPlatform == K.ChatPlatform.Messenger) {
     messengerChatID = chatName;
   } else if (chatPlatform == K.ChatPlatform.Instagram) {

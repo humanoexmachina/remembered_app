@@ -2,7 +2,7 @@
 
 import sqlite3 from 'sqlite3';
 import * as path from 'node:path';
-import { db, appDataDir } from '../index.js';
+import { db, appDataDir } from '../master.js';
 import * as constants from '../util/constants.js';
 
 export function connectRememberedDB() {
@@ -143,7 +143,13 @@ export async function insertNewContact(contactName) {
   });
 }
 
-export async function insertNewChat(chatTitle, messengerChatID, instagramChatID, participantIds, platform) {
+export async function insertNewChat(
+  chatTitle,
+  messengerChatID,
+  instagramChatID,
+  participantIds,
+  platform
+) {
   const query =
     'INSERT INTO chats(created, last_updated, customTitle, messengerChatID, instagramChatID, participants, platforms, status) VALUES(?,?,?,?,?,?,?,?)';
   const activeStatus = constants.ChatStatus.Active;

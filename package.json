@@ -1,32 +1,51 @@
 {
   "name": "remembered_app",
-  "version": "1.0.0",
-  "description": "MVP for the remembered app",
-  "main": "index.js",
-  "type": "module",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "server": "node index.js",
-    "client": "npm run start --prefix remembered_ui",
-    "dev": "concurrently \"npm run server\" \"npm run client\""
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/humanoexmachina/remembered_app.git"
-  },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/humanoexmachina/remembered_app/issues"
-  },
-  "homepage": "https://github.com/humanoexmachina/remembered_app#readme",
+  "version": "0.1.0",
+  "private": true,
   "dependencies": {
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
     "adm-zip": "^0.5.9",
     "concurrently": "^7.6.0",
     "get-folder-size": "^4.0.0",
     "junk": "^4.0.0",
-    "sqlite3": "^5.1.2",
-    "utf-8": "^2.0.0",
-    "utf8": "^3.0.0"
-  }
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",
+    "sqlite3": "^5.1.4",
+    "utf8": "^3.0.0",
+    "wait-on": "^7.0.1",
+    "web-vitals": "^2.1.4"
+  },
+  "main": "main.cjs",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "electron-react": "concurrently \"BROWSER=none npm start\" \"wait-on http://localhost:3000 && electron .\""
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "electron": "^22.0.0"
+  },
+  "type": "module"
 }

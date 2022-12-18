@@ -5,7 +5,7 @@ import utf8 from 'utf8';
 import * as path from 'node:path';
 
 import * as dbService from './db.js';
-import * as index from '../index.js';
+import * as index from '../master.js';
 import * as K from '../util/constants.js';
 
 export async function importSingleChat(
