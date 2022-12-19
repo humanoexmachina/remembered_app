@@ -9,6 +9,7 @@ import IdentifyMePage from './Components/IdentifyMePage.js';
 import MatchContactsPage from './Components/MatchContactsPage.js';
 import ConfirmImportPage from './Components/ConfirmImportPage.js';
 import StatusPage from './Components/StatusPage.js';
+import ImportSuccessPage from './Components/ImportSuccessPage.js'
 import ViewChatPage from './Components/ViewChatPage.js';
 
 function App() {
