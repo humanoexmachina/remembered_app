@@ -1,17 +1,13 @@
 // 1) Import React and ReactDOM Librariers
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
 import App from './App.js';
 import { HashRouter } from 'react-router-dom';
 
-ReactDOM.render(
+const root = ReactDOM.createRoot(document.getElementById('root'));
+
+root.render(
     <HashRouter>
         <App />
-    </HashRouter>,
-    document.getElementById('root')
+    </HashRouter>
 );
-
-
-// const root = ReactDOM.createRoot(document.getElementById('root'));
-
-// root.render(<App />);

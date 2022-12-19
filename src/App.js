@@ -1,5 +1,5 @@
-// import { useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { useState } from 'react';
 
 import HomePage from './Components/HomePage.js';
 import ChoosePlatformPage from './Components/ChoosePlatformPage.js';
@@ -13,12 +13,18 @@ import ImportSuccessPage from './Components/ImportSuccessPage.js'
 import ViewChatPage from './Components/ViewChatPage.js';
 
 function App() {
+  const [chatPlatform, setChatPlatform] = useState("unknown");
+
+  function chooseChatPlatform(platform) {
+    setChatPlatform(platform);
+  };
+
   return (
     <div>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="import/choose-platform" element={<ChoosePlatformPage />} />
-        <Route path="import/upload-file" element={<UploadFilePage />} />
+        <Route path="import/choose-platform" element={<ChoosePlatformPage chatPlatform={chatPlatform} chooseChatPlatform={chooseChatPlatform} />} />
+        <Route path="import/upload-file" element={<UploadFilePage chatPlatform={chatPlatform} />} />
         <Route
           path="import/processing"
           element={<StatusPage status="Processing Files..." />}
