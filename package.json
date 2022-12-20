@@ -3,10 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^6.2.1",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "adm-zip": "^0.5.9",
+    "bulma": "^0.9.4",
     "concurrently": "^7.6.0",
     "get-folder-size": "^4.0.0",
     "junk": "^4.0.0",
