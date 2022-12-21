@@ -2,35 +2,59 @@ import { Routes, Route } from 'react-router-dom';
 import { useState } from 'react';
 
 import HomePage from './Components/HomePage.js';
-import ChoosePlatformPage from './Components/ChoosePlatformPage.js';
-import UploadFilePage from './Components/UploadFilePage.js';
-import SelectChatsPage from './Components/SelectChatsPage.js';
-import IdentifyMePage from './Components/IdentifyMePage.js';
-import MatchContactsPage from './Components/MatchContactsPage.js';
-import ConfirmImportPage from './Components/ConfirmImportPage.js';
-import StatusPage from './Components/StatusPage.js';
-import ImportSuccessPage from './Components/ImportSuccessPage.js'
-import ViewChatPage from './Components/ViewChatPage.js';
+import ChoosePlatformPage from './Components/Import/Pages/ChoosePlatformPage.js';
+import UploadFilePage from './Components/Import/Pages/UploadFilePage.js';
+import SelectChatsPage from './Components/Import/Pages/SelectChatsPage.js';
+import IdentifyMePage from './Components/Import/Pages/IdentifyMePage.js';
+import MatchContactsPage from './Components/Import/Pages/MatchContactsPage.js';
+import ConfirmImportPage from './Components/Import/Pages/ConfirmImportPage.js';
+import StatusPage from './Components/Import/Pages/StatusPage.js';
+import ImportSuccessPage from './Components/Import/Pages/ImportSuccessPage.js';
+import ViewChatPage from './Components/Import/Pages/ViewChatPage.js';
 
 function App() {
-  const [chatPlatform, setChatPlatform] = useState("unknown");
-
+  const [chatPlatform, setChatPlatform] = useState('unknown');
   function chooseChatPlatform(platform) {
     setChatPlatform(platform);
-  };
+  }
+
+  const [identifiedMe, setMe] = useState(null);
+  function identifyMe(username) {
+    setMe(username);
+  }
 
   return (
     <div>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="import/choose-platform" element={<ChoosePlatformPage chatPlatform={chatPlatform} chooseChatPlatform={chooseChatPlatform} />} />
-        <Route path="import/upload-file" element={<UploadFilePage chatPlatform={chatPlatform} />} />
+        <Route
+          path="import/choose-platform"
+          element={
+            <ChoosePlatformPage
+              chatPlatform={chatPlatform}
+              chooseChatPlatform={chooseChatPlatform}
+            />
+          }
+        />
+        <Route
+          path="import/upload-file"
+          element={<UploadFilePage chatPlatform={chatPlatform} />}
+        />
         <Route
           path="import/processing"
           element={<StatusPage status="Processing Files..." />}
         />
         <Route path="import/select-chats" element={<SelectChatsPage />} />
-        <Route path="import/identify-me" element={<IdentifyMePage />} />
+        <Route
+          path="import/identify-me"
+          element={
+            <IdentifyMePage
+              chatPlatform={chatPlatform}
+              identifiedUser={identifiedMe}
+              identifyMe={identifyMe}
+            />
+          }
+        />
         <Route path="import/match-contacts" element={<MatchContactsPage />} />
         <Route path="import/confirm-import" element={<ConfirmImportPage />} />
         <Route
