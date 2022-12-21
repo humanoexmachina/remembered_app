@@ -1,16 +1,7 @@
-import { useState } from 'react';
-
 import 'bulma/css/bulma.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
 import ImportContainer from '../Components/ImportContainer.js';
-
-const initialMap = {
-  'me myself and I': false,
-  'big party': false,
-  'alice wang': false,
-  husky: false,
-};
 
 export default function SelectChatsPage({ selectChats, chats }) {
   const handleClick = (key) => {

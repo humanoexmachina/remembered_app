@@ -39,6 +39,122 @@ function App() {
     }));
   }
 
+  const initialContactsMap = {
+    Alice: {
+      contact: null,
+      chats: [
+        'party',
+        'hello world',
+        'friends',
+        'Toronto Pen Club',
+        'party',
+        'hello world',
+        'friends',
+        'Toronto Pen Club',
+        'party',
+        'hello world',
+        'friends',
+        'Toronto Pen Club',
+        'party',
+        'hello world',
+        'friends',
+        'Toronto Pen Club',
+        'party',
+        'hello world',
+        'friends',
+        'Toronto Pen Club',
+        'party',
+        'hello world',
+        'friends',
+        'Toronto Pen Club',
+        'party',
+        'hello world',
+        'friends',
+        'Toronto Pen Club',
+        'party',
+        'hello world',
+        'friends',
+        'Toronto Pen Club',
+        'party',
+        'hello world',
+        'friends',
+        'Toronto Pen Club',
+      ],
+    },
+    ChunYu: {
+      contact: null,
+      chats: [
+        'party',
+        'hello world',
+        'friends',
+        'Toronto Pen Club',
+        'hello world',
+        'friends',
+        'Toronto Pen Club',
+        'party',
+        'hello world',
+        'friends',
+        'Toronto Pen Club',
+        'party',
+        'hello world',
+        'friends',
+        'Toronto Pen Club',
+        'party',
+      ],
+    },
+    Husky: {
+      contact: null,
+      chats: ['party', 'hello world', 'friends', 'Toronto Pen Club'],
+    },
+    Squishy: {
+      contact: null,
+      chats: ['party', 'hello world', 'friends', 'Toronto Pen Club'],
+    },
+    'John-Doe': {
+      contact: null,
+      chats: ['party', 'hello world', 'friends', 'Toronto Pen Club'],
+    },
+    Tom: {
+      contact: null,
+      chats: ['party', 'hello world', 'friends', 'Toronto Pen Club'],
+    },
+    Steve: {
+      contact: null,
+      chats: ['party', 'hello world', 'friends', 'Toronto Pen Club'],
+    },
+    'Mary-Jane-Anne': {
+      contact: null,
+      chats: ['party', 'hello world', 'friends', 'Toronto Pen Club'],
+    },
+    Jane: {
+      contact: null,
+      chats: ['party', 'hello world', 'friends', 'Toronto Pen Club'],
+    },
+    Rainy: {
+      contact: null,
+      chats: ['party', 'hello world', 'friends', 'Toronto Pen Club'],
+    },
+    LilSnoLeopard: {
+      contact: null,
+      chats: ['party', 'hello world', 'friends', 'Toronto Pen Club'],
+    },
+    SeaWeedKisses: {
+      contact: null,
+      chats: ['party', 'hello world', 'friends', 'Toronto Pen Club'],
+    },
+  };
+
+  const [contactsMap, setContactsMap] = useState(initialContactsMap);
+  function mapContact(key, value) {
+    let chatsList = contactsMap[key].chats;
+    setContactsMap((prevState) => ({
+      ...prevState,
+      [key]: { contact: value, chats: chatsList },
+    }));
+
+    console.log(contactsMap);
+  }
+
   return (
     <div>
       <Routes>
@@ -74,7 +190,15 @@ function App() {
             />
           }
         />
-        <Route path="import/match-contacts" element={<MatchContactsPage />} />
+        <Route
+          path="import/match-contacts"
+          element={
+            <MatchContactsPage
+              contactsMap={contactsMap}
+              mapContact={mapContact}
+            />
+          }
+        />
         <Route path="import/confirm-import" element={<ConfirmImportPage />} />
         <Route
           path="import/importing"
