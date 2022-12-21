@@ -6,6 +6,12 @@ import ImportContactModal from '../Components/ImportContactModal.js';
 import { useState } from 'react';
 
 export default function MatchContactsPage({ contactsMap, mapContact }) {
+  let [selectedContact, setContact] = useState(null);
+
+  function selectContact(name) {
+    setContact(name);
+  }
+
   const [modal, setModal] = useState(false);
 
   function toggleModal() {
@@ -13,7 +19,7 @@ export default function MatchContactsPage({ contactsMap, mapContact }) {
   }
 
   const handleClick = (key, value) => {
-    // mapContact(key, value);
+    selectContact(key);
     toggleModal();
   };
 
@@ -77,7 +83,7 @@ export default function MatchContactsPage({ contactsMap, mapContact }) {
               </figure>
             </div>
             <div className="column">
-              <p className="title is-5">John Smith</p>
+              <p className="title is-5">{contactsMap[key].contact}</p>
             </div>
           </div>
         </div>
@@ -88,7 +94,7 @@ export default function MatchContactsPage({ contactsMap, mapContact }) {
   return (
     <ImportContainer
       title="Match Your Contacts"
-      back="../import/select-chats"
+      back="../import/identify-me"
       next="../import/confirm-import"
     >
       <>
@@ -96,7 +102,12 @@ export default function MatchContactsPage({ contactsMap, mapContact }) {
 
         {/* Modal */}
         {modal && (
-          <ImportContactModal modal={modal} toggleModal={toggleModal} />
+          <ImportContactModal
+            modal={modal}
+            toggleModal={toggleModal}
+            name={selectedContact}
+            mapContact={mapContact}
+          />
         )}
       </>
     </ImportContainer>

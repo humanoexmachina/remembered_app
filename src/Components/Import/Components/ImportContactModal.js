@@ -1,8 +1,21 @@
 import ReactModal from 'react-modal';
+import { useState } from 'react';
+
 import ImportContactSearch from './ImportContactSearch.js';
 
-export default function ImportContactModal({ modal, toggleModal }) {
+export default function ImportContactModal({
+  modal,
+  toggleModal,
+  name,
+  mapContact,
+}) {
   ReactModal.setAppElement('#root');
+
+  // const [selectedContact, setContact] = useState(null);
+
+  // function chooseContact(value) {
+  //   setContact(value);
+  // }
 
   return (
     <ReactModal
@@ -22,6 +35,7 @@ export default function ImportContactModal({ modal, toggleModal }) {
           transform: 'translate(-50%, -50%)',
           maxWidth: '600px',
           minWidth: '300px',
+          minHeight: '500px',
           border: '0px solid #ccc',
           background: '#fff',
           overflow: 'auto',
@@ -33,7 +47,10 @@ export default function ImportContactModal({ modal, toggleModal }) {
       }}
     >
       <div className="columns is-mobile">
-        <div className="column"></div>
+        <div className="column">
+          <h1 className="title">Match Contact {name}</h1>
+          {/* matched to {selectedContact} */}
+        </div>
         <div className="column is-narrow">
           <button
             className="button"
@@ -46,7 +63,11 @@ export default function ImportContactModal({ modal, toggleModal }) {
           </button>
         </div>
       </div>
-      <ImportContactSearch />
+      <ImportContactSearch
+        mapContact={mapContact}
+        name={name}
+        toggleModal={toggleModal}
+      />
     </ReactModal>
   );
 }
