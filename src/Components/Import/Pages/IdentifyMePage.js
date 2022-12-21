@@ -31,6 +31,7 @@ export default function IdentifyMePage({
 
   const renderedObj = uniqueUsers.map((username, index) => (
     <button
+      key={index}
       className={
         identifiedUser === username
           ? 'button is-primary mx-3 my-3'

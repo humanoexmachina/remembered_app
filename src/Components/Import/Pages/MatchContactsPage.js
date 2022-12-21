@@ -2,7 +2,7 @@ import 'bulma/css/bulma.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
 import ImportContainer from '../Components/ImportContainer.js';
-import ImportContactModal from '../Components/ImportContactModal/ImportContactModal.js';
+import ImportContactModal from '../Components/ImportContactModal.js';
 import { useState } from 'react';
 
 export default function MatchContactsPage({ contactsMap, mapContact }) {
@@ -22,12 +22,7 @@ export default function MatchContactsPage({ contactsMap, mapContact }) {
   const maxChatLength = 280;
 
   const renderedObj = Object.keys(contactsMap).map((key) => (
-    <div
-      className="box"
-      key={key}
-      onClick={() => handleClick(key, value)}
-      style={{ cursor: 'pointer' }}
-    >
+    <div className="box" key={key} onClick={() => handleClick(key, value)}>
       <div className="columns is-mobile is-vcentered">
         <div className="column">
           <div className="columns is-vcentered">
@@ -90,12 +85,6 @@ export default function MatchContactsPage({ contactsMap, mapContact }) {
     </div>
   ));
 
-  if (modal) {
-    document.body.classList.add('active-modal');
-  } else {
-    document.body.classList.remove('active-modal');
-  }
-
   return (
     <ImportContainer
       title="Match Your Contacts"
@@ -106,7 +95,9 @@ export default function MatchContactsPage({ contactsMap, mapContact }) {
         {renderedObj}
 
         {/* Modal */}
-        {modal && <ImportContactModal toggleModal={toggleModal} />}
+        {modal && (
+          <ImportContactModal modal={modal} toggleModal={toggleModal} />
+        )}
       </>
     </ImportContainer>
   );
