@@ -23,6 +23,22 @@ function App() {
     setMe(username);
   }
 
+  const initialChatMap = {
+    'me myself and I': false,
+    'big party': false,
+    'alice wang': false,
+    husky: false,
+  };
+
+  const [chats, setChatSelection] = useState(initialChatMap);
+  function selectChats(key) {
+    let curVal = chats[key];
+    setChatSelection((prevState) => ({
+      ...prevState,
+      [key]: !curVal,
+    }));
+  }
+
   return (
     <div>
       <Routes>
@@ -44,7 +60,10 @@ function App() {
           path="import/processing"
           element={<StatusPage status="Processing Files..." />}
         />
-        <Route path="import/select-chats" element={<SelectChatsPage />} />
+        <Route
+          path="import/select-chats"
+          element={<SelectChatsPage chats={chats} selectChats={selectChats} />}
+        />
         <Route
           path="import/identify-me"
           element={

@@ -12,16 +12,9 @@ const initialMap = {
   husky: false,
 };
 
-export default function SelectChatsPage() {
-  const [chats, setChatSelection] = useState(initialMap);
-
+export default function SelectChatsPage({ selectChats, chats }) {
   const handleClick = (key) => {
-    let curVal = chats[key];
-    setChatSelection((prevState) => ({
-      ...prevState,
-      [key]: !curVal,
-    }));
-    console.log(chats);
+    selectChats(key);
   };
 
   const renderedObj = Object.keys(chats).map((key) => (
