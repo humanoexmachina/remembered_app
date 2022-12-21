@@ -27,5 +27,9 @@ yarn-error.log*
 .DS_Store
 *.txt
 userEnv/
-public/main.js
-public/preload.js
+
+# build-electron
+/dist
+/icon-build
+/public/main.js
+/public/preload.js
