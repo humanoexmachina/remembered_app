@@ -1,7 +1,7 @@
 module.exports = {
-    experiments: {
-        topLevelAwait: true
-    },
+    // experiments: {
+    //     topLevelAwait: true
+    // },
     externals: {
         sqlite3: 'commonjs sqlite3',
     },

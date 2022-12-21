@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 
-// TODO: Add state to pass the chatPlatform information
 export default function UploadFilePage({ chatPlatform }) {
 
 const [chatNames, setChatNames] = useState(['no-path']);

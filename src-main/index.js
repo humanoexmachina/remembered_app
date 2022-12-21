@@ -1,28 +1,20 @@
 // Modules to control application life and create native browser window
 import { app, BrowserWindow, ipcMain } from 'electron';
-import { path } from 'path';
 import { unZip, detectPlatform, validateChatFolder, sortChats } from '../backendScripts/service/fileProcessor';
 import { ChatPlatform } from '../backendScripts/util/constants';
-import { isDev } from 'electron-is-dev';
 
 const appDataDir = `/Users/alicewang913/Documents/Remembered`; // there is a wiki for setting this with electron
 const userImportedFilePath = `/Users/alicewang913/Documents/Memory/alice_wwwww913_ins_JSON`;
 let chatPlatform = ChatPlatform.Unknown;
 
 async function handleProcessFile () {
-  // const { canceled, filePaths } = await dialog.showOpenDialog();
-  // if (canceled) {
-  //   return
-  // } else {
-  //   console.log(`Currently handling processing ${filePaths[0]}`);
-  //   return filePaths[0];
-  // }
   const chatFilePath = unZip(userImportedFilePath, appDataDir);
   console.log('Chat File Path:', chatFilePath);
   let inboxDir = '';
 
   try {
     chatPlatform = detectPlatform(chatFilePath);
+    console.log('Chat Platform:', chatPlatform);
   } catch (error) {
     console.error(error);
   }
@@ -47,14 +39,14 @@ function createWindow() {
     // frame: false,
     // resizable: false,
     // transparent: false,
-    // webPreferences: {
-    //   preload: path.join(__dirname, 'preload.js'),
-    // },
+    webPreferences: {
+      // preload: path.join(__dirname, '../src-preload/index.js'),
+      preload: '/Users/alicewang913/Documents/GitHub/remembered_app/src-preload/index.js',
+    },
   });
 
   // and load the index.html of the app.
-  mainWindow.loadURL(`file://${path.join(__dirname, 'index.html')}`);
-  // mainWindow.loadURL('http://localhost:3000');
+  mainWindow.loadURL('http://localhost:3000');
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools()
