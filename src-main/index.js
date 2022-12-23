@@ -5,6 +5,7 @@ import { ChatPlatform } from '../backendScripts/util/constants';
 
 const appDataDir = `/Users/alicewang913/Documents/Remembered`; // there is a wiki for setting this with electron
 const userImportedFilePath = `/Users/alicewang913/Documents/Memory/alice_wwwww913_ins_JSON`;
+const preloadScriptPath = '/Users/alicewang913/Documents/GitHub/remembered_app/src-preload/index.js';
 let chatPlatform = ChatPlatform.Unknown;
 
 async function handleProcessFile () {
@@ -41,7 +42,7 @@ function createWindow() {
     // transparent: false,
     webPreferences: {
       // preload: path.join(__dirname, '../src-preload/index.js'),
-      preload: '/Users/alicewang913/Documents/GitHub/remembered_app/src-preload/index.js',
+      preload: preloadScriptPath,
     },
   });
 
