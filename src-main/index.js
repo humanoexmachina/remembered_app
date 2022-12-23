@@ -1,12 +1,27 @@
 // Modules to control application life and create native browser window
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import { unZip, detectPlatform, validateChatFolder, sortChats } from '../backendScripts/service/fileProcessor';
 import { ChatPlatform } from '../backendScripts/util/constants';
 
 const appDataDir = `/Users/alicewang913/Documents/Remembered`; // there is a wiki for setting this with electron
-const userImportedFilePath = `/Users/alicewang913/Documents/Memory/alice_wwwww913_ins_JSON`;
+let userImportedFilePath = '';
 const preloadScriptPath = '/Users/alicewang913/Documents/GitHub/remembered_app/src-preload/index.js';
 let chatPlatform = ChatPlatform.Unknown;
+
+async function handleSelectFile() {
+  const { canceled, filePaths } = await dialog.showOpenDialog({properties: ['openFile', 'openDirectory']}, 
+                                                              {title: 'Select a Chat File to Upload'},
+                                                              {filters: [
+                                                                { name : 'Zip', extensions: ['zip']},
+                                                                { name : 'Directory', extensions: ['','dir']}
+                                                              ]});
+  if (canceled) {
+    return;
+  } else {
+    userImportedFilePath = filePaths[0];
+    return filePaths[0];
+  }
+}
 
 async function handleProcessFile () {
   const chatFilePath = unZip(userImportedFilePath, appDataDir);
@@ -41,6 +56,7 @@ function createWindow() {
     // resizable: false,
     // transparent: false,
     webPreferences: {
+      nodeIntegration: true,
       // preload: path.join(__dirname, '../src-preload/index.js'),
       preload: preloadScriptPath,
     },
@@ -57,6 +73,7 @@ function createWindow() {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  ipcMain.handle('dialog:chooseFile', handleSelectFile);
   ipcMain.handle('processFile', handleProcessFile);
   createWindow();
 

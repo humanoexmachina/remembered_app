@@ -18,6 +18,11 @@ function App() {
     setChatPlatform(platform);
   }
 
+  const [chatFilePath, setChatFilePath] = useState('');
+  function chooseChatFile(filePath) {
+    setChatFilePath(filePath);
+  }
+
   const [identifiedMe, setMe] = useState(null);
   function identifyMe(username) {
     setMe(username);
@@ -170,7 +175,7 @@ function App() {
         />
         <Route
           path="import/upload-file"
-          element={<UploadFilePage chatPlatform={chatPlatform} />}
+          element={<UploadFilePage chatPlatform={chatPlatform} chatFilePath={chatFilePath} chooseChatFile={chooseChatFile} />}
         />
         <Route
           path="import/processing"

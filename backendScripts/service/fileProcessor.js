@@ -1,5 +1,4 @@
 import * as K from '../util/constants.js';
-// import * as index from '../master.js';
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
