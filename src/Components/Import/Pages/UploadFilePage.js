@@ -1,25 +1,38 @@
-// import { Link } from 'react-router-dom';
+import ImportContainer from '../Components/ImportContainer.js';
 
-import { useState } from "react";
+export default function UploadFilePage({ chatPlatform, chatFilePath, chooseChatFile, initializeChats, signalProcessingComplete }) {
 
-export default function UploadFilePage({ chatPlatform }) {
+  async function handleSelectFile() {
+    chooseChatFile(await window.fileAPI.chooseFile());
+  }
 
-const [chatNames, setChatNames] = useState(['no-path']);
+  async function handleUploadClick() {
+    // Spin up a loading logo
+    let chatNames = await window.fileAPI.processFile();
+    initializeChats(chatNames);
+    console.log('Have initialized chat selection');
+    signalProcessingComplete(true);
+  }
 
-async function handleUploadClick() {
-  setChatNames(await window.fileAPI.processFile());
-}
-
-  return (
+  function MainContent() {
+    return (
     <div>
-      <h1> Import your {chatPlatform} chat file</h1>
-      <button onClick={handleUploadClick} type="button">Upload</button>
-      <ul>
-        {chatNames.map((chatName) => (
-          <li key={chatName}>{chatName}</li>
-        ))}
-      </ul>
+      <button onClick={handleSelectFile} type="button">Select a Chat File to Import</button>
+
+      <p>Do you want to import this chat file: {chatFilePath}? </p>
+      <button onClick={handleUploadClick} type="button">Import</button>
+
       <h3> Help! How do I get my chat file?</h3>
     </div>
+  )}
+
+  return (
+    <ImportContainer
+      title="Import your Chat File"
+      back="../import/choose-platform"
+      next="../import/select-chats"
+    >
+      <MainContent/>
+    </ImportContainer>
   );
 }

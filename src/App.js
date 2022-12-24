@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useState } from 'react';
 
 import HomePage from './Components/HomePage.js';
@@ -18,25 +18,59 @@ function App() {
     setChatPlatform(platform);
   }
 
-  const [identifiedMe, setMe] = useState(null);
-  function identifyMe(username) {
-    setMe(username);
+  const [chatFilePath, setChatFilePath] = useState('');
+  function chooseChatFile(filePath) {
+    setChatFilePath(filePath);
   }
 
-  const initialChatMap = {
-    'me myself and I': false,
-    'big party': false,
-    'alice wang': false,
-    husky: false,
-  };
+  // let initialChatMap = new Map();
 
-  const [chats, setChatSelection] = useState(initialChatMap);
+  // const [chatNames, setChatNames] = useState([]);
+  // function getChatNames(chatNames) {
+  //   console.log('Chat name to set are', chatNames);
+  //   setChatNames(chatNames);
+  //   // console.log('Chat Names: ', chatNames);
+  //   // chatNames.forEach((chatName) => {
+  //   //   initialChatMap.set(chatName, false);
+  //   // });
+  //   // console.log('initial Chat Map: ', initialChatMap);
+  // }
+
+  async function initializeChats(chatNames) {
+    let initialChatMap = new Map();
+    console.log('Chat names are', chatNames);
+    chatNames.forEach((chatName) => {
+      initialChatMap.set(chatName, false);
+    });
+    console.log('Initial Chat Map: ', initialChatMap);
+    await setChatSelection(initialChatMap);
+    console.log('Chats are:', chats);
+  }
+
+  const [finishProcessing, setFinishProcessing ] = useState(false);
+  function signalProcessingComplete(status) {
+    setFinishProcessing(status);
+  }
+
+  // const initialChatMap = {
+  //   'me myself and I': false,
+  //   'big party': false,
+  //   'alice wang': false,
+  //   husky: false,
+  // };
+
+  const [chats, setChatSelection] = useState({'alice': false});
   function selectChats(key) {
     let curVal = chats[key];
     setChatSelection((prevState) => ({
       ...prevState,
       [key]: !curVal,
     }));
+  }
+
+  const [identifiedMe, setMe] = useState(null);
+  function identifyMe(username) {
+    setMe(username);
   }
 
   const initialContactsMap = {
@@ -170,7 +204,8 @@ function App() {
         />
         <Route
           path="import/upload-file"
-          element={<UploadFilePage chatPlatform={chatPlatform} />}
+          element={<UploadFilePage chatPlatform={chatPlatform} chatFilePath={chatFilePath} chooseChatFile={chooseChatFile}
+          initializeChats={initializeChats} signalProcessingComplete={signalProcessingComplete} />}
         />
         <Route
           path="import/processing"
