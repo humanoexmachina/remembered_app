@@ -7,6 +7,7 @@
     "@emotion/styled": "^11.10.5",
     "@fortawesome/fontawesome-free": "^6.2.1",
     "@mui/joy": "^5.0.0-alpha.59",
+    "@mui/material": "^5.11.1",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
