@@ -1,20 +1,30 @@
 // Modules to control application life and create native browser window
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
-import { unZip, detectPlatform, validateChatFolder, sortChats } from '../backendScripts/service/fileProcessor';
+import {
+  unZip,
+  detectPlatform,
+  validateChatFolder,
+  sortChats,
+} from '../backendScripts/service/fileProcessor';
 import { ChatPlatform } from '../backendScripts/util/constants';
 
-const appDataDir = `/Users/alicewang913/Documents/Remembered`; // there is a wiki for setting this with electron
+const appDataDir = `userEnv/appData`; // there is a wiki for setting this with electron
 let userImportedFilePath = '';
-const preloadScriptPath = '/Users/alicewang913/Documents/GitHub/remembered_app/src-preload/index.js';
+const preloadScriptPath =
+  '/Users/shichunyu/Documents/GitHub/remembered_app/src-preload/index.js';
 let chatPlatform = ChatPlatform.Unknown;
 
 async function handleSelectFile() {
-  const { canceled, filePaths } = await dialog.showOpenDialog({properties: ['openFile', 'openDirectory']}, 
-                                                              {title: 'Select a Chat File to Upload'},
-                                                              {filters: [
-                                                                { name : 'Zip', extensions: ['zip']},
-                                                                { name : 'Directory', extensions: ['','dir']}
-                                                              ]});
+  const { canceled, filePaths } = await dialog.showOpenDialog(
+    { properties: ['openFile', 'openDirectory'] },
+    { title: 'Select a Chat File to Upload' },
+    {
+      filters: [
+        { name: 'Zip', extensions: ['zip'] },
+        { name: 'Directory', extensions: ['', 'dir'] },
+      ],
+    }
+  );
   if (canceled) {
     return;
   } else {
@@ -23,7 +33,7 @@ async function handleSelectFile() {
   }
 }
 
-async function handleProcessFile () {
+async function handleProcessFile() {
   const chatFilePath = unZip(userImportedFilePath, appDataDir);
   console.log('Chat File Path:', chatFilePath);
   let inboxDir = '';
@@ -44,7 +54,7 @@ async function handleProcessFile () {
 
   const chatMap = await sortChats(inboxDir, chatPlatform);
   console.log('chatMap:', chatMap);
-  return [ ...chatMap.keys() ];
+  return [...chatMap.keys()];
 }
 
 function createWindow() {
@@ -66,7 +76,7 @@ function createWindow() {
   mainWindow.loadURL('http://localhost:3000');
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools();
 }
 
 // This method will be called when Electron has finished

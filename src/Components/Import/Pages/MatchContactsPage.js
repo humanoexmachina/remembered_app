@@ -94,8 +94,10 @@ export default function MatchContactsPage({ contactsMap, mapContact }) {
   return (
     <ImportContainer
       title="Match Your Contacts"
-      back="../import/identify-me"
-      next="../import/confirm-import"
+      backText="Back"
+      backPath="../import/identify-me"
+      nextText="Next"
+      nextPath="../import/confirm-import"
     >
       <>
         {renderedObj}

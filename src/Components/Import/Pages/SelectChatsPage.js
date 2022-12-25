@@ -23,8 +23,10 @@ export default function SelectChatsPage({ selectChats, chats }) {
   return (
     <ImportContainer
       title="Select Chats to Import"
-      back="../import/upload-file"
-      next="../import/identify-me"
+      backText="Back"
+      backPath="../import/upload-file"
+      nextText="Next"
+      nextPath="../import/identify-me"
     >
       {renderedObj}
     </ImportContainer>

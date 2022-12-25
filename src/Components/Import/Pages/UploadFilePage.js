@@ -1,7 +1,12 @@
 import ImportContainer from '../Components/ImportContainer.js';
 
-export default function UploadFilePage({ chatPlatform, chatFilePath, chooseChatFile, initializeChats, signalProcessingComplete }) {
-
+export default function UploadFilePage({
+  chatPlatform,
+  chatFilePath,
+  chooseChatFile,
+  initializeChats,
+  signalProcessingComplete,
+}) {
   async function handleSelectFile() {
     chooseChatFile(await window.fileAPI.chooseFile());
   }
@@ -16,23 +21,30 @@ export default function UploadFilePage({ chatPlatform, chatFilePath, chooseChatF
 
   function MainContent() {
     return (
-    <div>
-      <button onClick={handleSelectFile} type="button">Select a Chat File to Import</button>
+      <div>
+        <button onClick={handleSelectFile} type="button">
+          Select a Chat File to Import
+        </button>
 
-      <p>Do you want to import this chat file: {chatFilePath}? </p>
-      <button onClick={handleUploadClick} type="button">Import</button>
+        <p>Do you want to import this chat file: {chatFilePath}? </p>
+        <button onClick={handleUploadClick} type="button">
+          Import
+        </button>
 
-      <h3> Help! How do I get my chat file?</h3>
-    </div>
-  )}
+        <h3> Help! How do I get my chat file?</h3>
+      </div>
+    );
+  }
 
   return (
     <ImportContainer
       title="Import your Chat File"
-      back="../import/choose-platform"
-      next="../import/select-chats"
+      backText="Back"
+      backPath="../import/choose-platform"
+      nextText="Next"
+      nextPath="../import/select-chats"
     >
-      <MainContent/>
+      <MainContent />
     </ImportContainer>
   );
 }

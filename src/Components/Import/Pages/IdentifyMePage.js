@@ -46,8 +46,10 @@ export default function IdentifyMePage({
   return (
     <ImportContainer
       title={`Which user are you on ${chatPlatform}?`}
-      back="../import/select-chats"
-      next="../import/match-contacts"
+      backText="Back"
+      backPath="../import/select-chats"
+      nextText="Next"
+      nextPath="../import/match-contacts"
     >
       <div className="columns">
         <div className="column is-multiline">{renderedObj}</div>

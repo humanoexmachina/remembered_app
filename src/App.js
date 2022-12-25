@@ -47,19 +47,19 @@ function App() {
     console.log('Chats are:', chats);
   }
 
-  const [finishProcessing, setFinishProcessing ] = useState(false);
+  const [finishProcessing, setFinishProcessing] = useState(false);
   function signalProcessingComplete(status) {
     setFinishProcessing(status);
   }
 
-  // const initialChatMap = {
-  //   'me myself and I': false,
-  //   'big party': false,
-  //   'alice wang': false,
-  //   husky: false,
-  // };
+  const initialChatMap = {
+    'me myself and I': false,
+    'big party': false,
+    'alice wang': false,
+    husky: false,
+  };
 
-  const [chats, setChatSelection] = useState({'alice': false});
+  const [chats, setChatSelection] = useState(initialChatMap);
   function selectChats(key) {
     let curVal = chats[key];
     setChatSelection((prevState) => ({
@@ -75,7 +75,7 @@ function App() {
 
   const initialContactsMap = {
     Alice: {
-      contact: null,
+      contact: 'Alice',
       chats: [
         'party',
         'hello world',
@@ -116,7 +116,7 @@ function App() {
       ],
     },
     ChunYu: {
-      contact: null,
+      contact: 'ChunYu',
       chats: [
         'party',
         'hello world',
@@ -137,7 +137,7 @@ function App() {
       ],
     },
     Husky: {
-      contact: null,
+      contact: 'Husky',
       chats: ['party', 'hello world', 'friends', 'Toronto Pen Club'],
     },
     Squishy: {
@@ -189,6 +189,38 @@ function App() {
     console.log(contactsMap);
   }
 
+  var numChatsToImport = 0;
+
+  function getNumChats() {
+    return Object.keys(chats).length;
+  }
+
+  var numExistingContacts = 0;
+  var numNewContacts = 0;
+
+  function sumContacts() {
+    numExistingContacts = 0;
+    numNewContacts = 0;
+
+    for (let key in contactsMap) {
+      if (contactsMap[key].contact != null) {
+        ++numExistingContacts;
+      } else {
+        ++numNewContacts;
+      }
+    }
+  }
+
+  function getNumExistingContacts() {
+    sumContacts();
+    return numExistingContacts;
+  }
+
+  function getNumNewContacts() {
+    sumContacts();
+    return numNewContacts;
+  }
+
   return (
     <div>
       <Routes>
@@ -204,8 +236,15 @@ function App() {
         />
         <Route
           path="import/upload-file"
-          element={<UploadFilePage chatPlatform={chatPlatform} chatFilePath={chatFilePath} chooseChatFile={chooseChatFile}
-          initializeChats={initializeChats} signalProcessingComplete={signalProcessingComplete} />}
+          element={
+            <UploadFilePage
+              chatPlatform={chatPlatform}
+              chatFilePath={chatFilePath}
+              chooseChatFile={chooseChatFile}
+              initializeChats={initializeChats}
+              signalProcessingComplete={signalProcessingComplete}
+            />
+          }
         />
         <Route
           path="import/processing"
@@ -234,7 +273,16 @@ function App() {
             />
           }
         />
-        <Route path="import/confirm-import" element={<ConfirmImportPage />} />
+        <Route
+          path="import/confirm-import"
+          element={
+            <ConfirmImportPage
+              getNumChats={getNumChats}
+              getNumExistingContacts={getNumExistingContacts}
+              getNumNewContacts={getNumNewContacts}
+            />
+          }
+        />
         <Route
           path="import/importing"
           element={<StatusPage status="Importing Chats" />}
