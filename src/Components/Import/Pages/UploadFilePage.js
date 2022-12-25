@@ -2,6 +2,7 @@ import ImportContainer from '../Components/ImportContainer.js';
 
 export default function UploadFilePage({ chatPlatform, chatFilePath, chooseChatFile, initializeChats, signalProcessingComplete }) {
 
+  const title = `Import your ${chatPlatform} Chat File`;
   async function handleSelectFile() {
     chooseChatFile(await window.fileAPI.chooseFile());
   }
@@ -24,11 +25,11 @@ export default function UploadFilePage({ chatPlatform, chatFilePath, chooseChatF
 
       <h3> Help! How do I get my chat file?</h3>
     </div>
-  )}
+  )};
 
   return (
     <ImportContainer
-      title="Import your Chat File"
+      title={title}
       back="../import/choose-platform"
       next="../import/select-chats"
     >
