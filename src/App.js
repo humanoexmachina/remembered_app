@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route} from 'react-router-dom';
 import { useState } from 'react';
 
 import HomePage from './Components/HomePage.js';
@@ -47,9 +47,9 @@ function App() {
     console.log('Chats are:', chats);
   }
 
-  const [finishProcessing, setFinishProcessing ] = useState(false);
-  function signalProcessingComplete(status) {
-    setFinishProcessing(status);
+  const [processingStatus, setProcessingStatus ] = useState('idle');
+  function updateProcessingStatus(status) {
+    setProcessingStatus(status);
   }
 
   // const initialChatMap = {
@@ -205,7 +205,7 @@ function App() {
         <Route
           path="import/upload-file"
           element={<UploadFilePage chatPlatform={chatPlatform} chatFilePath={chatFilePath} chooseChatFile={chooseChatFile}
-          initializeChats={initializeChats} signalProcessingComplete={signalProcessingComplete} />}
+          initializeChats={initializeChats} processingStatus={processingStatus} updateProcessingStatus={updateProcessingStatus} />}
         />
         <Route
           path="import/processing"
