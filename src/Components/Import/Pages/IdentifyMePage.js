@@ -1,27 +1,11 @@
-import { useState } from 'react';
-
 import 'bulma/css/bulma.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
 import ImportContainer from '../Components/ImportContainer.js';
 
-const uniqueUsers = [
-  'Alice',
-  'ChunYu',
-  'Husky',
-  'Squishy',
-  'John-Doe',
-  'Tom',
-  'Steve',
-  'Mary-Jane-Anne',
-  'Jane',
-  'Rainy',
-  'LilSnoLeopard',
-  'SeaWeedKisses',
-];
-
 export default function IdentifyMePage({
   chatPlatform,
+  contactsMap,
   identifyMe,
   identifiedUser,
 }) {
@@ -29,17 +13,17 @@ export default function IdentifyMePage({
     identifyMe(name);
   };
 
-  const renderedObj = uniqueUsers.map((username, index) => (
+  const renderedObj = Object.keys(contactsMap).map((key) => (
     <button
-      key={index}
+      key={key}
       className={
-        identifiedUser === username
+        identifiedUser === key
           ? 'button is-primary mx-3 my-3'
           : 'button mx-3 my-3'
       }
-      onClick={() => handleClick(username)}
+      onClick={() => handleClick(key)}
     >
-      {username}
+      {key}
     </button>
   ));
 

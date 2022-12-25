@@ -75,7 +75,7 @@ function App() {
 
   const initialContactsMap = {
     Alice: {
-      contact: 'Alice',
+      contact: null,
       chats: [
         'party',
         'hello world',
@@ -116,7 +116,7 @@ function App() {
       ],
     },
     ChunYu: {
-      contact: 'ChunYu',
+      contact: null,
       chats: [
         'party',
         'hello world',
@@ -137,7 +137,7 @@ function App() {
       ],
     },
     Husky: {
-      contact: 'Husky',
+      contact: null,
       chats: ['party', 'hello world', 'friends', 'Toronto Pen Club'],
     },
     Squishy: {
@@ -188,8 +188,6 @@ function App() {
 
     console.log(contactsMap);
   }
-
-  var numChatsToImport = 0;
 
   function getNumChats() {
     return Object.keys(chats).length;
@@ -259,6 +257,7 @@ function App() {
           element={
             <IdentifyMePage
               chatPlatform={chatPlatform}
+              contactsMap={contactsMap}
               identifiedUser={identifiedMe}
               identifyMe={identifyMe}
             />
