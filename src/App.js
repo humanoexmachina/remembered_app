@@ -1,5 +1,5 @@
 import { Routes, Route} from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import HomePage from './Components/HomePage.js';
 import ChoosePlatformPage from './Components/Import/Pages/ChoosePlatformPage.js';
@@ -23,49 +23,37 @@ function App() {
     setChatFilePath(filePath);
   }
 
-  // let initialChatMap = new Map();
-
-  // const [chatNames, setChatNames] = useState([]);
-  // function getChatNames(chatNames) {
-  //   console.log('Chat name to set are', chatNames);
-  //   setChatNames(chatNames);
-  //   // console.log('Chat Names: ', chatNames);
-  //   // chatNames.forEach((chatName) => {
-  //   //   initialChatMap.set(chatName, false);
-  //   // });
-  //   // console.log('initial Chat Map: ', initialChatMap);
-  // }
-
-  async function initializeChats(chatNames) {
-    let initialChatMap = new Map();
-    console.log('Chat names are', chatNames);
-    chatNames.forEach((chatName) => {
-      initialChatMap.set(chatName, false);
-    });
-    console.log('Initial Chat Map: ', initialChatMap);
-    await setChatSelection(initialChatMap);
-    console.log('Chats are:', chats);
+  const [chatNames, setChatNames] = useState([]);
+  function getChatNames(chatNames) {
+    setChatNames(chatNames);
   }
 
-  const [processingStatus, setProcessingStatus ] = useState('idle');
-  function updateProcessingStatus(status) {
-    setProcessingStatus(status);
-  }
-
-  // const initialChatMap = {
-  //   'me myself and I': false,
-  //   'big party': false,
-  //   'alice wang': false,
-  //   husky: false,
-  // };
-
-  const [chats, setChatSelection] = useState({'alice': false});
+  const [chats, setChatSelection] = useState({});
   function selectChats(key) {
     let curVal = chats[key];
     setChatSelection((prevState) => ({
       ...prevState,
       [key]: !curVal,
     }));
+  }
+
+  useEffect(() => {
+    initializeChats(chatNames);
+    console.log('updated chats');
+  }, [chatNames]);
+
+  function initializeChats(chatNames) {
+    let initialChatMap = {};
+    chatNames.forEach((chatName) => {
+      initialChatMap[chatName] = false;
+    });
+
+    setChatSelection(initialChatMap);
+  }
+
+  const [processingStatus, setProcessingStatus ] = useState('idle');
+  function updateProcessingStatus(status) {
+    setProcessingStatus(status);
   }
 
   const [identifiedMe, setMe] = useState(null);
@@ -205,7 +193,7 @@ function App() {
         <Route
           path="import/upload-file"
           element={<UploadFilePage chatPlatform={chatPlatform} chatFilePath={chatFilePath} chooseChatFile={chooseChatFile}
-          initializeChats={initializeChats} processingStatus={processingStatus} updateProcessingStatus={updateProcessingStatus} />}
+          getChatNames={getChatNames} processingStatus={processingStatus} updateProcessingStatus={updateProcessingStatus} />}
         />
         <Route
           path="import/processing"
@@ -213,7 +201,7 @@ function App() {
         />
         <Route
           path="import/select-chats"
-          element={<SelectChatsPage chats={chats} selectChats={selectChats} />}
+          element={<SelectChatsPage selectChats={selectChats} chats={chats} />}
         />
         <Route
           path="import/identify-me"
