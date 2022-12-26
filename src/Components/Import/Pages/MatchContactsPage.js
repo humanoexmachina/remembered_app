@@ -5,7 +5,13 @@ import ImportContainer from '../Components/ImportContainer.js';
 import ImportContactModal from '../Components/ImportContactModal.js';
 import { useState } from 'react';
 
-export default function MatchContactsPage({ contactsMap, mapContact }) {
+export default function MatchContactsPage({
+  participantsMap,
+  mapParticipant,
+  existingContacts,
+  getUnMatchedContacts,
+  matchExistingContact,
+}) {
   let [selectedContact, setContact] = useState(null);
 
   function selectContact(name) {
@@ -27,7 +33,7 @@ export default function MatchContactsPage({ contactsMap, mapContact }) {
 
   const maxChatLength = 280;
 
-  const renderedObj = Object.keys(contactsMap).map((key) => (
+  const renderedObj = Object.keys(participantsMap).map((key) => (
     <div className="box" key={key} onClick={() => handleClick(key, value)}>
       <div className="columns is-mobile is-vcentered">
         <div className="column">
@@ -35,7 +41,7 @@ export default function MatchContactsPage({ contactsMap, mapContact }) {
             <div className="column is-narrow">
               <button
                 className={
-                  contactsMap[key].contact === null
+                  participantsMap[key].contact === null
                     ? 'button is-large'
                     : 'button is-large is-success'
                 }
@@ -43,7 +49,7 @@ export default function MatchContactsPage({ contactsMap, mapContact }) {
                 <span className="icon">
                   <i
                     className={
-                      contactsMap[key].contact === null
+                      participantsMap[key].contact === null
                         ? 'fas fa-question'
                         : 'fas fa-check'
                     }
@@ -55,11 +61,11 @@ export default function MatchContactsPage({ contactsMap, mapContact }) {
               <strong>{key} &nbsp;</strong>
               <br />
               <small>
-                {contactsMap[key].chats.join(', ').length > maxChatLength
-                  ? contactsMap[key].chats
+                {participantsMap[key].chats.join(', ').length > maxChatLength
+                  ? participantsMap[key].chats
                       .join(', ')
                       .substring(0, maxChatLength) + '...'
-                  : contactsMap[key].chats.join(', ')}
+                  : participantsMap[key].chats.join(', ')}
               </small>
             </div>
           </div>
@@ -67,7 +73,7 @@ export default function MatchContactsPage({ contactsMap, mapContact }) {
 
         <div
           className={
-            contactsMap[key].contact === null
+            participantsMap[key].contact === null
               ? 'is-hidden'
               : 'column is-one-third'
           }
@@ -83,7 +89,7 @@ export default function MatchContactsPage({ contactsMap, mapContact }) {
               </figure>
             </div>
             <div className="column">
-              <p className="title is-5">{contactsMap[key].contact}</p>
+              <p className="title is-5">{participantsMap[key].contact}</p>
             </div>
           </div>
         </div>
@@ -108,7 +114,11 @@ export default function MatchContactsPage({ contactsMap, mapContact }) {
             modal={modal}
             toggleModal={toggleModal}
             name={selectedContact}
-            mapContact={mapContact}
+            participantsMap={participantsMap}
+            existingContacts={existingContacts}
+            getUnMatchedContacts={getUnMatchedContacts}
+            mapParticipant={mapParticipant}
+            matchExistingContact={matchExistingContact}
           />
         )}
       </>

@@ -10,13 +10,16 @@ export default function SelectChatsPage({ selectChats, chats }) {
 
   const renderedObj = Object.keys(chats).map((key) => (
     <div className="columns is-vcentered" key={key}>
-      <button className="button mr-3" onClick={() => handleClick(key)}>
-        <span className="icon">
-          <i className={chats[key] ? `fas fa-check` : ``}></i>
+      <div className="column">
+        <button className="button mr-3" onClick={() => handleClick(key)}>
+          <span className="icon">
+            <i className={chats[key] ? `fas fa-check` : ``}></i>
+          </span>
+        </button>
+        <span style={{ fontWeight: chats[key] ? `bold` : `normal` }}>
+          {key}
         </span>
-      </button>
-      <span style={{ fontWeight: chats[key] ? `bold` : `normal` }}>{key}</span>
-      <hr style={{ borderTop: '1px dashed lightgray' }}></hr>
+      </div>
     </div>
   ));
 

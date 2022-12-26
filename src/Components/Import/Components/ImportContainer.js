@@ -12,13 +12,11 @@ export default function ImportContainer({
   nextPath,
 }) {
   return (
-    <div className="container" style={{ padding: '0.5rem' }}>
+    <div className="container p-1">
       <div className="columns is-centered">
         <div className="column is-three-quarters">
           <ImportHeader>{title}</ImportHeader>
-
           {children}
-
           <ImportBottomNav
             backText={backText}
             backPath={backPath}

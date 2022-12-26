@@ -7,7 +7,11 @@ export default function ImportContactModal({
   modal,
   toggleModal,
   name,
-  mapContact,
+  participantsMap,
+  existingContacts,
+  getUnMatchedContacts,
+  mapParticipant,
+  matchExistingContact,
 }) {
   ReactModal.setAppElement('#root');
 
@@ -64,9 +68,13 @@ export default function ImportContactModal({
         </div>
       </div>
       <ImportContactSearch
-        mapContact={mapContact}
         name={name}
         toggleModal={toggleModal}
+        participantsMap={participantsMap}
+        existingContacts={existingContacts}
+        getUnMatchedContacts={getUnMatchedContacts}
+        mapParticipant={mapParticipant}
+        matchExistingContact={matchExistingContact}
       />
     </ReactModal>
   );

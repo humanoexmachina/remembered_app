@@ -5,7 +5,7 @@ import ImportContainer from '../Components/ImportContainer.js';
 
 export default function IdentifyMePage({
   chatPlatform,
-  contactsMap,
+  participantsMap,
   identifyMe,
   identifiedUser,
 }) {
@@ -13,7 +13,7 @@ export default function IdentifyMePage({
     identifyMe(name);
   };
 
-  const renderedObj = Object.keys(contactsMap).map((key) => (
+  const renderedObj = Object.keys(participantsMap).map((key) => (
     <button
       key={key}
       className={

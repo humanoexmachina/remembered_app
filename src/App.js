@@ -73,7 +73,7 @@ function App() {
     setMe(username);
   }
 
-  const initialContactsMap = {
+  const initialParticipantsMap = {
     Alice: {
       contact: null,
       chats: [
@@ -178,17 +178,60 @@ function App() {
     },
   };
 
-  const [contactsMap, setContactsMap] = useState(initialContactsMap);
-  function mapContact(key, value) {
-    let chatsList = contactsMap[key].chats;
-    setContactsMap((prevState) => ({
+  const [participantsMap, setparticipantsMap] = useState(
+    initialParticipantsMap
+  );
+  function mapParticipant(key, value) {
+    let chatsList = participantsMap[key].chats;
+    setparticipantsMap((prevState) => ({
       ...prevState,
       [key]: { contact: value, chats: chatsList },
     }));
-
-    console.log(contactsMap);
   }
 
+  /* Existing Contacts and whether they have been matched */
+  let queriedExistingContacts = {
+    'Alice Wang': null,
+    'Chunyu Shi': null,
+    Mom: null,
+    Dad: null,
+    'Joe Schmoe': null,
+    'Steve Smith': null,
+    'Jane Doe': null,
+    'Mary Jane': null,
+    'Richard Wagner': null,
+    'Ludvig Van Beethoven': null,
+    'Amadeus Mozart': null,
+  };
+
+  const [existingContacts, setExistingContacts] = useState(
+    queriedExistingContacts
+  );
+
+  function getUnMatchedContacts() {
+    let unmatchedContacts = [];
+    for (let contactName in existingContacts) {
+      if (existingContacts[contactName] != null) {
+        continue;
+      }
+      unmatchedContacts.push(contactName);
+    }
+
+    return unmatchedContacts;
+  }
+
+  function matchExistingContact(key, bool) {
+    setExistingContacts((prevState) => ({
+      ...prevState,
+      [key]: bool,
+    }));
+  }
+  // TODO: not totally sure where to set this. Has to be after import
+  function resetDefaultExistingContacts() {
+    setExistingContacts(queriedExistingContacts);
+  }
+
+  /* Final Confirm Import Page */
   function getNumChats() {
     return Object.keys(chats).length;
   }
@@ -200,8 +243,8 @@ function App() {
     numExistingContacts = 0;
     numNewContacts = 0;
 
-    for (let key in contactsMap) {
-      if (contactsMap[key].contact != null) {
+    for (let key in participantsMap) {
+      if (participantsMap[key].contact != null) {
         ++numExistingContacts;
       } else {
         ++numNewContacts;
@@ -257,7 +300,7 @@ function App() {
           element={
             <IdentifyMePage
               chatPlatform={chatPlatform}
-              contactsMap={contactsMap}
+              participantsMap={participantsMap}
               identifiedUser={identifiedMe}
               identifyMe={identifyMe}
             />
@@ -267,8 +310,11 @@ function App() {
           path="import/match-contacts"
           element={
             <MatchContactsPage
-              contactsMap={contactsMap}
-              mapContact={mapContact}
+              participantsMap={participantsMap}
+              mapParticipant={mapParticipant}
+              getUnMatchedContacts={getUnMatchedContacts}
+              existingContacts={existingContacts}
+              matchExistingContact={matchExistingContact}
             />
           }
         />
