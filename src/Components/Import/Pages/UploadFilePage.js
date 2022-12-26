@@ -60,8 +60,10 @@ export default function UploadFilePage({
   return (
     <ImportContainer
       title={title}
-      back="../import/choose-platform"
-      next="../import/select-chats"
+      backPath="../import/choose-platform"
+      backText="Back"
+      nextPath="../import/select-chats"
+      nextText="Next"
     >
       <MainContent />
     </ImportContainer>

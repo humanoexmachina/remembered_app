@@ -6,7 +6,7 @@ import ImportContactSearch from './ImportContactSearch.js';
 export default function ImportContactModal({
   modal,
   toggleModal,
-  name,
+  participantName,
   participantsMap,
   existingContacts,
   getUnMatchedContacts,
@@ -52,7 +52,7 @@ export default function ImportContactModal({
     >
       <div className="columns is-mobile">
         <div className="column">
-          <h1 className="title">Match Contact {name}</h1>
+          <h1 className="title">Match Contact {participantName}</h1>
           {/* matched to {selectedContact} */}
         </div>
         <div className="column is-narrow">
@@ -68,7 +68,7 @@ export default function ImportContactModal({
         </div>
       </div>
       <ImportContactSearch
-        name={name}
+        participantName={participantName}
         toggleModal={toggleModal}
         participantsMap={participantsMap}
         existingContacts={existingContacts}

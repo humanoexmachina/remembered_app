@@ -23,19 +23,6 @@ function App() {
     setChatFilePath(filePath);
   }
 
-  // let initialChatMap = new Map();
-
-  // const [chatNames, setChatNames] = useState([]);
-  // function getChatNames(chatNames) {
-  //   console.log('Chat name to set are', chatNames);
-  //   setChatNames(chatNames);
-  //   // console.log('Chat Names: ', chatNames);
-  //   // chatNames.forEach((chatName) => {
-  //   //   initialChatMap.set(chatName, false);
-  //   // });
-  //   // console.log('initial Chat Map: ', initialChatMap);
-  // }
-
   async function initializeChats(chatNames) {
     let initialChatMap = new Map();
     console.log('Chat names are', chatNames);
@@ -226,6 +213,7 @@ function App() {
       [key]: bool,
     }));
   }
+
   // TODO: not totally sure where to set this. Has to be after import
   function resetDefaultExistingContacts() {
     setExistingContacts(queriedExistingContacts);
@@ -283,7 +271,8 @@ function App() {
               chatFilePath={chatFilePath}
               chooseChatFile={chooseChatFile}
               initializeChats={initializeChats}
-              signalProcessingComplete={signalProcessingComplete}
+              processingStatus={processingStatus}
+              updateProcessingStatus={updateProcessingStatus}
             />
           }
         />

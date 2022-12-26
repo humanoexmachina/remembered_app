@@ -4,7 +4,7 @@ import Autocomplete from '@mui/joy/Autocomplete/index.js';
 // https://mui.com/joy-ui/react-autocomplete/
 
 export default function ImportContactSearch({
-  name,
+  participantName,
   toggleModal,
   participantsMap,
   existingContacts,
@@ -15,15 +15,22 @@ export default function ImportContactSearch({
   return (
     <Autocomplete
       options={getUnMatchedContacts()}
-      onChange={(event, selectedContact) => {
-        console.log(selectedContact);
-        mapParticipant(name, selectedContact);
-        if (participantsMap[selectedContact] != null) {
-          matchExistingContact(selectedContact, null);
+      onChange={(event, selectedDropdownContact) => {
+        let prevSelectedContact = participantsMap[participantName];
+        console.log('participantName:', participantName);
+        console.log(
+          'prevSelectedContact.contact:',
+          prevSelectedContact.contact
+        );
+        console.log('selectedDropdownContact:', selectedDropdownContact);
+        if (prevSelectedContact.contact != null) {
+          console.log('this participant is already matched, clearing!');
+          matchExistingContact(prevSelectedContact.contact, null);
           console.log(existingContacts);
         }
-        matchExistingContact(selectedContact, name);
-        console.log(existingContacts);
+        matchExistingContact(selectedDropdownContact, participantName);
+        mapParticipant(participantName, selectedDropdownContact);
+        // console.log(existingContacts);
         toggleModal();
       }}
     />

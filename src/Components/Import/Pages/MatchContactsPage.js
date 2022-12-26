@@ -113,7 +113,7 @@ export default function MatchContactsPage({
           <ImportContactModal
             modal={modal}
             toggleModal={toggleModal}
-            name={selectedContact}
+            participantName={selectedContact}
             participantsMap={participantsMap}
             existingContacts={existingContacts}
             getUnMatchedContacts={getUnMatchedContacts}
