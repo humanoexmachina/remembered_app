@@ -1,6 +1,8 @@
 import ReactModal from 'react-modal';
 import { useState } from 'react';
 
+import Button from '@mui/joy/Button';
+
 import ImportContactSearch from './ImportContactSearch.js';
 
 export default function ImportContactModal({
@@ -15,11 +17,12 @@ export default function ImportContactModal({
 }) {
   ReactModal.setAppElement('#root');
 
-  // const [selectedContact, setContact] = useState(null);
+  let matchedContact = participantsMap[participantName].contact;
 
-  // function chooseContact(value) {
-  //   setContact(value);
-  // }
+  const handleClick = (participant, contact) => {
+    matchExistingContact(contact, null);
+    mapParticipant(participant, null);
+  };
 
   return (
     <ReactModal
@@ -38,7 +41,7 @@ export default function ImportContactModal({
           left: '50%',
           transform: 'translate(-50%, -50%)',
           maxWidth: '600px',
-          minWidth: '300px',
+          minWidth: '450px',
           minHeight: '500px',
           border: '0px solid #ccc',
           background: '#fff',
@@ -65,6 +68,28 @@ export default function ImportContactModal({
               <i className="fas fa-times"></i>
             </span>
           </button>
+        </div>
+      </div>
+      <div className="block">
+        <div className="columns is-vcentered is-mobile">
+          <div className="column">
+            <span>
+              <strong>Currently matched to:</strong>{' '}
+              {matchedContact == null ? 'none' : matchedContact}
+            </span>
+          </div>
+          {matchedContact != null && (
+            <div className="column is-narrow">
+              <Button
+                onClick={handleClick(participantName, matchedContact)}
+                variant="plain"
+              >
+                <span style={{ color: 'gray' }}>
+                  <i className="fas fa-times"></i>&nbsp; Clear
+                </span>
+              </Button>
+            </div>
+          )}
         </div>
       </div>
       <ImportContactSearch
