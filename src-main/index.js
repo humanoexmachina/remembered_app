@@ -7,8 +7,9 @@ import {
   sortChats,
   getChatFiles,
 } from '../backendScripts/service/fileProcessor';
-// import { importSingleChat } from '../backendScripts/service/jsonImporter';
+import { importSingleChat } from '../backendScripts/service/jsonImporter';
 import { ChatPlatform } from '../backendScripts/util/constants';
+import { connectRememberedDB } from '../backendScripts/service/db';
 
 const appDataDir = `userEnv/appData`; // there is a wiki for setting this with electron
 let userImportedFilePath = '';
@@ -17,6 +18,8 @@ const preloadScriptPath =
 let chatPlatform = ChatPlatform.Unknown;
 let chatMap = null;
 let inboxDir = null;
+
+let db = null;
 
 async function handleSelectFile() {
   const { canceled, filePaths } = await dialog.showOpenDialog(
@@ -61,8 +64,29 @@ async function handleProcessFile() {
 }
 
 async function handleImportChats() {
-  getChatFiles(chatPlatform, chatMap, inboxDir);
+  await getChatFiles(chatPlatform, chatMap, inboxDir);
   console.log(chatMap);
+
+  connectRememberedDB(appDataDir);
+
+  // for (let chatName in chatMap) {
+  //   let messengerChatID = null;
+  //   let instagramChatID = null;
+
+  //   if ((chatPlatform = ChatPlatform.Instagram)) {
+  //     instagramChatID = chatMap[chatName].name;
+  //   } else if ((chatPlatform = ChatPlatform.Messenger)) {
+  //     messengerChatID = chatMap[chatName].name;
+  //   }
+
+  //   importSingleChat(
+  //     chatName,
+  //     messengerChatID,
+  //     instagramChatID,
+  //     chatMap[chatName].mediaPath,
+  //     chatMap[chatName].chatFilePaths
+  //   );
+  // }
 }
 
 function createWindow() {

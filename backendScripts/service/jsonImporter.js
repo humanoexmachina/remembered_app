@@ -5,10 +5,11 @@ import utf8 from 'utf8';
 import * as path from 'node:path';
 
 import * as dbService from './db.js';
-import * as index from '../master.js';
+// import * as index from '../master.js';
 import * as K from '../util/constants.js';
 
 export async function importSingleChat(
+  chatPlatform,
   chatTitle,
   messengerChatID,
   instagramChatID,
@@ -58,17 +59,11 @@ export async function importSingleChat(
     messengerChatID,
     instagramChatID,
     contactIds,
-    index.chatPlatform
+    chatPlatform
   );
   console.log('newly created chat:', chatId);
 
-  importMsgStaging(
-    allMessages,
-    senderDic,
-    chatId,
-    index.chatPlatform,
-    chatMediaPath
-  );
+  importMsgStaging(allMessages, senderDic, chatId, chatPlatform, chatMediaPath);
   console.log('completed import session');
 }
 
@@ -126,7 +121,8 @@ export async function importMsgStaging(
   senderDic,
   chatId,
   platform,
-  chatMediaPath
+  chatMediaPath,
+  importDataPath
 ) {
   console.log('%%% Starting import of messages into Staging DB %%%');
   for (let i = 0; i < messages.length; i++) {
@@ -246,10 +242,7 @@ export async function importMsgStaging(
     } else if (audioFiles != undefined) {
       // currently each of the media loops creates a new message row for each file. This needs to be refactored to properly support multiple files
       for (let i = 0; i < audioFiles.length; i++) {
-        const originalAudioUri = path.join(
-          index.importDataPath,
-          audioFiles[i].uri
-        );
+        const originalAudioUri = path.join(importDataPath, audioFiles[i].uri);
         const newAudioUri = path.join(
           chatMediaPath,
           'audio',
@@ -279,10 +272,7 @@ export async function importMsgStaging(
       }
     } else if (videoFiles != undefined) {
       for (let i = 0; i < videoFiles.length; i++) {
-        const originalVideoUri = path.join(
-          index.importDataPath,
-          videoFiles[i].uri
-        );
+        const originalVideoUri = path.join(importDataPath, videoFiles[i].uri);
         const newVideoUri = path.join(
           chatMediaPath,
           'videos',
@@ -312,10 +302,7 @@ export async function importMsgStaging(
       }
     } else if (photoFiles != undefined) {
       for (let i = 0; i < photoFiles.length; i++) {
-        const originalPhotoUri = path.join(
-          index.importDataPath,
-          photoFiles[i].uri
-        );
+        const originalPhotoUri = path.join(importDataPath, photoFiles[i].uri);
         const newPhotoUri = path.join(
           chatMediaPath,
           'photos',

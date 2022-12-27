@@ -2,10 +2,9 @@
 
 import sqlite3 from 'sqlite3';
 import * as path from 'node:path';
-import { db, appDataDir } from '../master.js';
 import * as constants from '../util/constants.js';
 
-export function connectRememberedDB() {
+export function connectRememberedDB(appDataDir) {
   return new sqlite3.Database(path.join(appDataDir, 'remembered.db'), (err) => {
     if (err) {
       console.log(err.message);
@@ -15,7 +14,7 @@ export function connectRememberedDB() {
   });
 }
 
-export function closeRememberedDB() {
+export function closeRememberedDB(db) {
   db.close((err) => {
     if (err) {
       console.error(err.message);
@@ -24,7 +23,7 @@ export function closeRememberedDB() {
   });
 }
 // Create chats, contacts and message staging tables in the db
-export function initializeDatabaseTables() {
+export function initializeDatabaseTables(db) {
   db.serialize(() => {
     db.run(
       `CREATE TABLE IF NOT EXISTS chats (
@@ -82,7 +81,7 @@ export function initializeDatabaseTables() {
   });
 }
 
-export async function checkContactExists(contactName) {
+export async function checkContactExists(db, contactName) {
   const query = `SELECT EXISTS(SELECT 1 FROM contacts WHERE nickname LIKE ? LIMIT 1) as ifexists`;
 
   return new Promise((resolve, reject) => {
@@ -97,7 +96,7 @@ export async function checkContactExists(contactName) {
   });
 }
 
-export async function getContactIdbyName(contactName) {
+export async function getContactIdbyName(db, contactName) {
   const query = `SELECT Id contactId FROM contacts WHERE nickname LIKE ? LIMIT 1`;
 
   return new Promise((resolve, reject) => {
@@ -112,7 +111,7 @@ export async function getContactIdbyName(contactName) {
   });
 }
 
-export async function insertNewContact(contactName) {
+export async function insertNewContact(db, contactName) {
   const query =
     'INSERT INTO contacts(created, last_updated, nickname) VALUES(?,?,?)';
   const values = [Date.now(), Date.now(), contactName];
@@ -144,6 +143,7 @@ export async function insertNewContact(contactName) {
 }
 
 export async function insertNewChat(
+  db,
   chatTitle,
   messengerChatID,
   instagramChatID,
@@ -192,6 +192,7 @@ export async function insertNewChat(
 }
 
 export async function insertNewMessage(
+  db,
   dateSent,
   chatId,
   platform,
