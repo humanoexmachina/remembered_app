@@ -7,9 +7,9 @@ import {
   sortChats,
   getChatFiles,
 } from '../backendScripts/service/fileProcessor';
-import { importSingleChat } from '../backendScripts/service/jsonImporter';
+// import { importSingleChat } from '../backendScripts/service/jsonImporter';
 import { ChatPlatform } from '../backendScripts/util/constants';
-import { connectRememberedDB } from '../backendScripts/service/db';
+// import { connectRememberedDB } from '../backendScripts/service/db';
 
 const appDataDir = `userEnv/appData`; // there is a wiki for setting this with electron
 let userImportedFilePath = '';
@@ -67,7 +67,7 @@ async function handleImportChats() {
   await getChatFiles(chatPlatform, chatMap, inboxDir);
   console.log(chatMap);
 
-  connectRememberedDB(appDataDir);
+  // connectRememberedDB(appDataDir);
 
   // for (let chatName in chatMap) {
   //   let messengerChatID = null;
