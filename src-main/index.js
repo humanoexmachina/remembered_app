@@ -1,12 +1,15 @@
 // Modules to control application life and create native browser window
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
-import { unZip, detectPlatform, validateChatFolder, sortChats } from '../backendScripts/service/fileProcessor';
+import { unZip, detectPlatform, validateChatFolder, sortChats, getChatFiles, getParticipants } from '../backendScripts/service/fileProcessor';
 import { ChatPlatform } from '../backendScripts/util/constants';
 
 const appDataDir = `/Users/alicewang913/Documents/Remembered`; // there is a wiki for setting this with electron
 let userImportedFilePath = '';
 const preloadScriptPath = '/Users/alicewang913/Documents/GitHub/remembered_app/src-preload/index.js';
 let chatPlatform = ChatPlatform.Unknown;
+let inboxDir = '';
+let chatMap = new Map();
+
 
 async function handleSelectFile() {
   const { canceled, filePaths } = await dialog.showOpenDialog({properties: ['openFile', 'openDirectory']}, 
@@ -26,7 +29,6 @@ async function handleSelectFile() {
 async function handleProcessFile () {
   const chatFilePath = unZip(userImportedFilePath, appDataDir);
   console.log('Chat File Path:', chatFilePath);
-  let inboxDir = '';
 
   try {
     chatPlatform = detectPlatform(chatFilePath);
@@ -42,10 +44,39 @@ async function handleProcessFile () {
     console.error(error);
   }
 
-  const chatMap = await sortChats(inboxDir, chatPlatform);
+  chatMap = await sortChats(inboxDir, chatPlatform);
   console.log('chatMap:', chatMap);
   return [ ...chatMap.keys() ];
 }
+
+async function handleParticipantsToChats(selectedChats) {
+
+  const chatMapWithPath = await getChatFiles(chatMap, inboxDir, chatMap);
+  let chatParticipantMap = new Map();
+  
+  // Read only the participant blob of each message json file
+  for (let chatName of selectedChats) {
+    if (selectedChats[chatName]) {
+      const participantList = await getParticipants(chatMapWithPath.get(chatName).chatFilePaths[0]);
+      chatParticipantMap.set(chatName, participantList);
+    }
+  }
+
+  return chatParticipantMap;
+}
+
+// async function handleMeContact(selectChats) {
+  
+//   const chatMapWithPath = await getChatFiles(chatMap, inboxDir, chatMap);
+
+//   for (let chatName of selectChats) {
+//     // Only read the participant list of the first chat that is checked
+//     if (selectChats[chatName]) {
+//       return getParticipants(chatMapWithPath.get(chatName).chatFilePaths[0]);
+//     }
+//   }
+//   return;
+// }
 
 function createWindow() {
   // Create the browser window.
@@ -75,6 +106,7 @@ function createWindow() {
 app.whenReady().then(() => {
   ipcMain.handle('dialog:chooseFile', handleSelectFile);
   ipcMain.handle('processFile', handleProcessFile);
+  ipcMain.handle('participantsToChats', handleParticipantsToChats);
   createWindow();
 
   app.on('activate', function () {

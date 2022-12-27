@@ -1,5 +1,3 @@
-'use strict';
-
 import * as fs from 'node:fs';
 import utf8 from 'utf8';
 import * as path from 'node:path';
@@ -135,7 +133,7 @@ export async function importMsgStaging(
     // IG & Messenger
     const senderName = utf8.decode(message.sender_name);
     const senderId =
-      senderDic[senderName] != undefined ? senderDic[senderName] : 0;
+      senderDic[senderName] !== undefined ? senderDic[senderName] : 0;
     const dateSent = message.timestamp_ms;
     const content = message.content;
 
@@ -168,12 +166,12 @@ export async function importMsgStaging(
     const reactionDic = {};
     const reactionArray = [];
 
-    if (reactions != undefined) {
+    if (reactions !== undefined) {
       for (let i = 0; i < reactions.length; i++) {
         const reaction = utf8.decode(reactions[i].reaction);
         const actor = utf8.decode(reactions[i].actor);
 
-        if (reactionDic[actor] == reaction) {
+        if (reactionDic[actor] === reaction) {
           continue;
         }
 
@@ -183,9 +181,9 @@ export async function importMsgStaging(
     }
 
     // checking for undefined: https://stackoverflow.com/questions/17150396/benefit-of-using-object-hasownproperty-vs-testing-if-a-property-is-undefined
-    if (content != undefined) {
+    if (content !== undefined) {
       /* Remove reactions - Instagram */
-      if (content == 'Liked a message') {
+      if (content === 'Liked a message') {
         continue;
       }
       /* Remove reactions - Messenger */
@@ -210,10 +208,10 @@ export async function importMsgStaging(
         callbackFn
       );
     } else if (
-      sticker != undefined ||
-      (stickerLink != undefined && stickerOwner != undefined)
+      sticker !== undefined ||
+      (stickerLink !== undefined && stickerOwner !== undefined)
     ) {
-      if (sticker != undefined) {
+      if (sticker !== undefined) {
         /* Messenger */
         const stickerUri = sticker.uri;
         const stickerMessage = K.MessageType.Sticker;
@@ -228,7 +226,7 @@ export async function importMsgStaging(
           stickerUri,
           callbackFn
         );
-      } else if (stickerLink != undefined && stickerOwner != undefined) {
+      } else if (stickerLink !== undefined && stickerOwner !== undefined) {
         const stickerMessage = K.MessageType.Sticker;
         /* Instagram*/
         await dbService.insertNewMessage(
@@ -243,7 +241,7 @@ export async function importMsgStaging(
           callbackFn
         );
       }
-    } else if (audioFiles != undefined) {
+    } else if (audioFiles !== undefined) {
       // currently each of the media loops creates a new message row for each file. This needs to be refactored to properly support multiple files
       for (let i = 0; i < audioFiles.length; i++) {
         const originalAudioUri = path.join(
@@ -277,7 +275,7 @@ export async function importMsgStaging(
           callbackFn
         );
       }
-    } else if (videoFiles != undefined) {
+    } else if (videoFiles !== undefined) {
       for (let i = 0; i < videoFiles.length; i++) {
         const originalVideoUri = path.join(
           index.importDataPath,
@@ -310,7 +308,7 @@ export async function importMsgStaging(
           callbackFn
         );
       }
-    } else if (photoFiles != undefined) {
+    } else if (photoFiles !== undefined) {
       for (let i = 0; i < photoFiles.length; i++) {
         const originalPhotoUri = path.join(
           index.importDataPath,
@@ -343,7 +341,7 @@ export async function importMsgStaging(
           callbackFn
         );
       }
-    } else if (gifs != undefined) {
+    } else if (gifs !== undefined) {
       for (let i = 0; i < gifs.length; i++) {
         const gifUri = gifs[i].uri;
         const gifMessage = K.MessageType.Gif;

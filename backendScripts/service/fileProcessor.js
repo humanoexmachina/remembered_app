@@ -1,5 +1,4 @@
 import * as K from '../util/constants.js';
-
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as AdmZip from 'adm-zip';
@@ -146,28 +145,31 @@ export async function sortChats(inboxDir, chatPlatform) {
 //   }
 // }
 
-// export async function getChatFiles() {
-//   switch (index.chatPlatform) {
-//     case K.ChatPlatform.Instagram:
-//     case K.ChatPlatform.Messenger:
-//       for (let chatName of index.chatMap.keys()) {
-//         // grab the chat json files based on chat name
-//         let jsonFileNames = fs
-//           .readdirSync(path.join(index.inboxDir, chatName))
-//           .filter((file) => {
-//             return path.extname(file) == '.json';
-//           });
-//         // console.log('jsonFilePath:', path.join(index.inboxDir, chatName));
-//         // console.log('jsonFileNames:', jsonFileNames);
+export async function getChatFiles(chatPlatform, inboxDir, chatMap) {
+  let updatedChatMap = chatMap;
+  switch (chatPlatform) {
+    case K.ChatPlatform.Instagram:
+    case K.ChatPlatform.Messenger:
+      for (let chatName of updatedChatMap.keys()) {
+        // grab the chat json files based on chat name
+        let jsonFileNames = fs
+          .readdirSync(path.join(inboxDir, chatName))
+          .filter((file) => {
+            return path.extname(file) === '.json';
+          });
+        // console.log('jsonFilePath:', path.join(index.inboxDir, chatName));
+        // console.log('jsonFileNames:', jsonFileNames);
 
-//         // get the full chat JSON file paths that can be used for import
-//         for (let chatFile of jsonFileNames) {
-//           let filePath = path.join(index.inboxDir, chatName, chatFile);
-//           // console.log('filePath:', filePath);
+        // get the full chat JSON file paths that can be used for import
+        for (let chatFile of jsonFileNames) {
+          let filePath = path.join(inboxDir, chatName, chatFile);
+          // console.log('filePath:', filePath);
 
-//           index.chatMap.get(chatName).chatFilePaths.push(filePath);
-//         }
-//       }
-//       break;
-//   }
-// }
+          updatedChatMap.get(chatName).chatFilePaths.push(filePath);
+        }
+      }
+      return updatedChatMap;
+    default:
+      console.log("chat platform undefined");
+  }
+}

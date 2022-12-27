@@ -45,21 +45,34 @@ function App() {
   function initializeChats(chatNames) {
     let initialChatMap = {};
     chatNames.forEach((chatName) => {
+      // const customTitle = chatName.split('_')[0];
       initialChatMap[chatName] = false;
     });
 
     setChatSelection(initialChatMap);
   }
 
-  const [processingStatus, setProcessingStatus ] = useState('idle');
+  const [ processingStatus, setProcessingStatus ] = useState('idle');
   function updateProcessingStatus(status) {
     setProcessingStatus(status);
+  }
+
+  const [ chatParticipantMap, setChatParticipantMap ] = useState(null);
+  function updateChatParticipantMap(newRelationship) {
+    setChatFilePath(newRelationship);
   }
 
   const [identifiedMe, setMe] = useState(null);
   function identifyMe(username) {
     setMe(username);
   }
+
+  let potentialMeUsers = [];
+  useEffect(() => {
+    // get participant list of a random chat
+    potentialMeUsers = chatParticipantMap;
+    console.log('updated potential me contacts');
+  }, [chatParticipantMap]);
 
   const initialContactsMap = {
     Alice: {
@@ -196,12 +209,8 @@ function App() {
           getChatNames={getChatNames} processingStatus={processingStatus} updateProcessingStatus={updateProcessingStatus} />}
         />
         <Route
-          path="import/processing"
-          element={<StatusPage status="Processing Files..." />}
-        />
-        <Route
           path="import/select-chats"
-          element={<SelectChatsPage selectChats={selectChats} chats={chats} />}
+          element={<SelectChatsPage selectChats={selectChats} chats={chats} updateChatParticipantMap={updateChatParticipantMap} />}
         />
         <Route
           path="import/identify-me"
