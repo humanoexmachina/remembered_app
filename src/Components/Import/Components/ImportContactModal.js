@@ -1,7 +1,4 @@
 import ReactModal from 'react-modal';
-import { useEffect, useRef, useState } from 'react';
-
-import Button from '@mui/joy/Button';
 
 import ImportContactSearch from './ImportContactSearch.js';
 
