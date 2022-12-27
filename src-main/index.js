@@ -9,7 +9,8 @@ import {
 } from '../backendScripts/service/fileProcessor';
 // import { importSingleChat } from '../backendScripts/service/jsonImporter';
 import { ChatPlatform } from '../backendScripts/util/constants';
-import { connectRememberedDB } from '../backendScripts/service/db';
+import sqlite3 from 'sqlite3';
+// import { connectRememberedDB } from '../backendScripts/service/db';
 
 const appDataDir = `userEnv/appData`; // there is a wiki for setting this with electron
 let userImportedFilePath = '';
