@@ -5,7 +5,7 @@ import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
 
-export default function UploadFilePage({ chatPlatform, chatFilePath, chooseChatFile, initializeChats, processingStatus, updateProcessingStatus }) {
+export default function UploadFilePage({ chatPlatform, chatFilePath, chooseChatFile, getChatNames, processingStatus, updateProcessingStatus }) {
 
   const title = `Import your ${chatPlatform} Chat File`;
   async function handleSelectFile() {
@@ -15,8 +15,7 @@ export default function UploadFilePage({ chatPlatform, chatFilePath, chooseChatF
   async function handleUploadClick() {
     updateProcessingStatus('progress');
     let chatNames = await window.fileAPI.processFile();
-    initializeChats(chatNames);
-    console.log('Have initialized chat selection');
+    getChatNames(chatNames);
     updateProcessingStatus('success');
   }
 
