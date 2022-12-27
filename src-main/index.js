@@ -5,7 +5,9 @@ import {
   detectPlatform,
   validateChatFolder,
   sortChats,
+  getChatFiles,
 } from '../backendScripts/service/fileProcessor';
+// import { importSingleChat } from '../backendScripts/service/jsonImporter';
 import { ChatPlatform } from '../backendScripts/util/constants';
 
 const appDataDir = `userEnv/appData`; // there is a wiki for setting this with electron
@@ -13,6 +15,8 @@ let userImportedFilePath = '';
 const preloadScriptPath =
   '/Users/shichunyu/Documents/GitHub/remembered_app/src-preload/index.js';
 let chatPlatform = ChatPlatform.Unknown;
+let chatMap = null;
+let inboxDir = null;
 
 async function handleSelectFile() {
   const { canceled, filePaths } = await dialog.showOpenDialog(
@@ -36,7 +40,6 @@ async function handleSelectFile() {
 async function handleProcessFile() {
   const chatFilePath = unZip(userImportedFilePath, appDataDir);
   console.log('Chat File Path:', chatFilePath);
-  let inboxDir = '';
 
   try {
     chatPlatform = detectPlatform(chatFilePath);
@@ -52,9 +55,14 @@ async function handleProcessFile() {
     console.error(error);
   }
 
-  const chatMap = await sortChats(inboxDir, chatPlatform);
+  chatMap = await sortChats(inboxDir, chatPlatform);
   console.log('chatMap:', chatMap);
   return [...chatMap.keys()];
+}
+
+async function handleImportChats() {
+  getChatFiles(chatPlatform, chatMap, inboxDir);
+  console.log(chatMap);
 }
 
 function createWindow() {
@@ -83,8 +91,11 @@ function createWindow() {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  // IPC Renderer
   ipcMain.handle('dialog:chooseFile', handleSelectFile);
   ipcMain.handle('processFile', handleProcessFile);
+  ipcMain.handle('importSelectedChats', handleImportChats);
+
   createWindow();
 
   app.on('activate', function () {

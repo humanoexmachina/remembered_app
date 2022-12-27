@@ -4,11 +4,12 @@ import { useEffect, useState } from 'react';
 import HomePage from './Components/HomePage.js';
 import ChoosePlatformPage from './Components/Import/Pages/ChoosePlatformPage.js';
 import UploadFilePage from './Components/Import/Pages/UploadFilePage.js';
+import StatusPage from './Components/Import/Pages/StatusPage.js';
 import SelectChatsPage from './Components/Import/Pages/SelectChatsPage.js';
 import IdentifyMePage from './Components/Import/Pages/IdentifyMePage.js';
 import MatchContactsPage from './Components/Import/Pages/MatchContactsPage.js';
 import ConfirmImportPage from './Components/Import/Pages/ConfirmImportPage.js';
-import StatusPage from './Components/Import/Pages/StatusPage.js';
+import ImportingPage from './Components/Import/Pages/ImportingPage.js';
 import ImportSuccessPage from './Components/Import/Pages/ImportSuccessPage.js';
 import ViewChatPage from './Components/Import/Pages/ViewChatPage.js';
 
@@ -318,10 +319,7 @@ function App() {
             />
           }
         />
-        <Route
-          path="import/importing"
-          element={<StatusPage status="Importing Chats" />}
-        />
+        <Route path="import/importing" element={<ImportingPage />} />
         <Route path="import/success" element={<ImportSuccessPage />} />
         <Route path="view-chat" element={<ViewChatPage />} />
       </Routes>

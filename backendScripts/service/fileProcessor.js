@@ -17,10 +17,7 @@ export function unZip(originalFilePath, appDataDir) {
   // check if the chat history is a zip file or folder
   const chatHistoryStats = fs.statSync(originalFilePath);
 
-  if (
-    chatHistoryStats.isFile() &&
-    path.extname(originalFilePath) === `.zip`
-  ) {
+  if (chatHistoryStats.isFile() && path.extname(originalFilePath) === `.zip`) {
     // users uploaded a zip file
     console.log(`Detected a zip file`);
 
@@ -123,7 +120,7 @@ export async function sortChats(inboxDir, chatPlatform) {
       // Parse chats with all contacts for now; only parse selected chats later based on user selection
       return chatMap;
     default:
-      console.log("chat platform undefined");
+      console.log('chat platform undefined');
   }
 }
 
@@ -146,28 +143,29 @@ export async function sortChats(inboxDir, chatPlatform) {
 //   }
 // }
 
-// export async function getChatFiles() {
-//   switch (index.chatPlatform) {
-//     case K.ChatPlatform.Instagram:
-//     case K.ChatPlatform.Messenger:
-//       for (let chatName of index.chatMap.keys()) {
-//         // grab the chat json files based on chat name
-//         let jsonFileNames = fs
-//           .readdirSync(path.join(index.inboxDir, chatName))
-//           .filter((file) => {
-//             return path.extname(file) == '.json';
-//           });
-//         // console.log('jsonFilePath:', path.join(index.inboxDir, chatName));
-//         // console.log('jsonFileNames:', jsonFileNames);
+export async function getChatFiles(chatPlatform, chatMap, inboxDir) {
+  switch (chatPlatform) {
+    case K.ChatPlatform.Instagram:
+    case K.ChatPlatform.Messenger:
+      for (let chatName of chatMap.keys()) {
+        // grab the chat json files based on chat name
+        let jsonFileNames = fs
+          .readdirSync(path.join(inboxDir, chatName))
+          .filter((file) => {
+            return path.extname(file) === '.json';
+          });
+        // console.log('jsonFilePath:', path.join(inboxDir, chatName));
+        // console.log('jsonFileNames:', jsonFileNames);
 
-//         // get the full chat JSON file paths that can be used for import
-//         for (let chatFile of jsonFileNames) {
-//           let filePath = path.join(index.inboxDir, chatName, chatFile);
-//           // console.log('filePath:', filePath);
+        // get the full chat JSON file paths that can be used for import
+        for (let chatFile of jsonFileNames) {
+          let filePath = path.join(inboxDir, chatName, chatFile);
+          // console.log('filePath:', filePath);
 
-//           index.chatMap.get(chatName).chatFilePaths.push(filePath);
-//         }
-//       }
-//       break;
-//   }
-// }
+          chatMap.get(chatName).chatFilePaths.push(filePath);
+        }
+      }
+      break;
+    default: // do nothing
+  }
+}
