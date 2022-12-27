@@ -20,7 +20,6 @@ export default function ChoosePlatformPage(props) {
         <FormLabel id="chat-platform-group">Chat Platform</FormLabel>
         <RadioGroup
           aria-labelledby="chat-platform-group"
-          // defaultValue="Messenger"
           name="radio-buttons-group"
         >
           <FormControlLabel

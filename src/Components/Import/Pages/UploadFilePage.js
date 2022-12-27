@@ -9,7 +9,7 @@ export default function UploadFilePage({
   chatPlatform,
   chatFilePath,
   chooseChatFile,
-  initializeChats,
+  getChatNames,
   processingStatus,
   updateProcessingStatus,
 }) {
@@ -21,8 +21,7 @@ export default function UploadFilePage({
   async function handleUploadClick() {
     updateProcessingStatus('progress');
     let chatNames = await window.fileAPI.processFile();
-    initializeChats(chatNames);
-    console.log('Have initialized chat selection');
+    getChatNames(chatNames);
     updateProcessingStatus('success');
   }
 
