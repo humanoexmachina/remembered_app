@@ -17,11 +17,6 @@ export default function ImportContactModal({
 }) {
   ReactModal.setAppElement('#root');
 
-  const handleClick = (participant, contact) => {
-    matchExistingContact(contact, null);
-    mapParticipant(participant, null);
-  };
-
   return (
     <ReactModal
       isOpen={modal}
