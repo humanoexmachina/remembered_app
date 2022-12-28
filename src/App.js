@@ -1,7 +1,8 @@
-import { Routes, Route} from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 
 import HomePage from './Components/HomePage.js';
+import DexieApp from './Components/Dexie-Sample/DexieApp.js';
 import ChoosePlatformPage from './Components/Import/Pages/ChoosePlatformPage.js';
 import UploadFilePage from './Components/Import/Pages/UploadFilePage.js';
 import SelectChatsPage from './Components/Import/Pages/SelectChatsPage.js';
@@ -51,7 +52,7 @@ function App() {
     setChatSelection(initialChatMap);
   }
 
-  const [processingStatus, setProcessingStatus ] = useState('idle');
+  const [processingStatus, setProcessingStatus] = useState('idle');
   function updateProcessingStatus(status) {
     setProcessingStatus(status);
   }
@@ -180,7 +181,7 @@ function App() {
   return (
     <div>
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<DexieApp />} />
         <Route
           path="import/choose-platform"
           element={
@@ -192,8 +193,16 @@ function App() {
         />
         <Route
           path="import/upload-file"
-          element={<UploadFilePage chatPlatform={chatPlatform} chatFilePath={chatFilePath} chooseChatFile={chooseChatFile}
-          getChatNames={getChatNames} processingStatus={processingStatus} updateProcessingStatus={updateProcessingStatus} />}
+          element={
+            <UploadFilePage
+              chatPlatform={chatPlatform}
+              chatFilePath={chatFilePath}
+              chooseChatFile={chooseChatFile}
+              getChatNames={getChatNames}
+              processingStatus={processingStatus}
+              updateProcessingStatus={updateProcessingStatus}
+            />
+          }
         />
         <Route
           path="import/processing"
